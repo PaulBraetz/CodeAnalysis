@@ -21,6 +21,8 @@ namespace RhoMicro.CodeAnalysis
 
         public IEnumerable<BaseTypeDeclarationSyntax> GetTypeDeclarations(IEnumerable<TypeIdentifier> include = null, IEnumerable<TypeIdentifier> exclude = null)
         {
+            var typeDeclarations = TypeDeclarations;
+
             if (include == null)
             {
                 include = Array.Empty<TypeIdentifier>();
@@ -29,11 +31,18 @@ namespace RhoMicro.CodeAnalysis
             {
                 exclude = Array.Empty<TypeIdentifier>();
             }
-            return TypeDeclarations.Where(d => !exclude.Any(a => HasAttribute(d.AttributeLists, d, a)) && include.Any(a => HasAttribute(d.AttributeLists, d, a)));
+            if(!exclude.Any() && !include.Any())
+            {
+                return typeDeclarations;
+            }
+
+            return typeDeclarations.Where(d => !exclude.Any(a => HasAttribute(d.AttributeLists, d, a)) && include.Any(a => HasAttribute(d.AttributeLists, d, a)));
         }
 
         public IEnumerable<PropertyDeclarationSyntax> GetPropertyDeclarations(BaseTypeDeclarationSyntax typeDeclaration, IEnumerable<TypeIdentifier> include = null, IEnumerable<TypeIdentifier> exclude = null)
         {
+            var properties = typeDeclaration.ChildNodes().OfType<PropertyDeclarationSyntax>();
+
             if (include == null)
             {
                 include = Array.Empty<TypeIdentifier>();
@@ -42,7 +51,11 @@ namespace RhoMicro.CodeAnalysis
             {
                 exclude = Array.Empty<TypeIdentifier>();
             }
-            return typeDeclaration.ChildNodes().OfType<PropertyDeclarationSyntax>().Where(d => !exclude.Any(a => HasAttribute(d.AttributeLists, d, a)) && include.Any(a => HasAttribute(d.AttributeLists, d, a)));
+            if (!exclude.Any() && !include.Any())
+            {
+                return properties;
+            }
+            return properties.Where(d => !exclude.Any(a => HasAttribute(d.AttributeLists, d, a)) && include.Any(a => HasAttribute(d.AttributeLists, d, a)));
         }
 
         public TypeIdentifier GetTypeArgumentOrDefault(SyntaxList<AttributeListSyntax> attributeLists, SyntaxNode node, TypeIdentifier attributeIdentifier)
