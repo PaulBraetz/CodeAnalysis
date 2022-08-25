@@ -17,7 +17,7 @@ namespace RhoMicro.CodeAnalysis
 
         public static TypeIdentifierName CreateAttribute<T>()
         {
-            return Create(typeof(T));
+            return CreateAttribute(typeof(T));
         }
         public static TypeIdentifierName CreateAttribute(Type type)
         {
