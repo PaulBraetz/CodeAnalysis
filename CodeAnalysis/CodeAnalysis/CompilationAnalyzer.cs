@@ -39,6 +39,26 @@ namespace RhoMicro.CodeAnalysis
             return typeDeclarations.Where(d => !exclude.Any(a => HasAttribute(d.AttributeLists, d, a)) && include.Any(a => HasAttribute(d.AttributeLists, d, a)));
         }
 
+        public IEnumerable<FieldDeclarationSyntax> GetFieldDeclarations(BaseTypeDeclarationSyntax typeDeclaration, IEnumerable<TypeIdentifier> include = null, IEnumerable<TypeIdentifier> exclude = null)
+        {
+            var fields = typeDeclaration.ChildNodes().OfType<FieldDeclarationSyntax>();
+
+            if (include == null)
+            {
+                include = Array.Empty<TypeIdentifier>();
+            }
+            if (exclude == null)
+            {
+                exclude = Array.Empty<TypeIdentifier>();
+            }
+            if (!exclude.Any() && !include.Any())
+            {
+                return fields;
+            }
+
+            return fields.Where(d => !exclude.Any(a => HasAttribute(d.AttributeLists, d, a)) && include.Any(a => HasAttribute(d.AttributeLists, d, a)));
+        }
+
         public IEnumerable<PropertyDeclarationSyntax> GetPropertyDeclarations(BaseTypeDeclarationSyntax typeDeclaration, IEnumerable<TypeIdentifier> include = null, IEnumerable<TypeIdentifier> exclude = null)
         {
             var properties = typeDeclaration.ChildNodes().OfType<PropertyDeclarationSyntax>();
@@ -55,6 +75,7 @@ namespace RhoMicro.CodeAnalysis
             {
                 return properties;
             }
+
             return properties.Where(d => !exclude.Any(a => HasAttribute(d.AttributeLists, d, a)) && include.Any(a => HasAttribute(d.AttributeLists, d, a)));
         }
 
