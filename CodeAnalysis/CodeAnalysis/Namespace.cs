@@ -121,7 +121,7 @@ namespace RhoMicro.CodeAnalysis
 
         public Boolean Equals(Namespace other)
         {
-            return Parts.Equals(other.Parts);
+            return Parts.SequenceEqual(other.Parts);
         }
 
         public override Int32 GetHashCode()

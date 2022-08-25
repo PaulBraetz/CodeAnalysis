@@ -162,7 +162,7 @@ namespace RhoMicro.CodeAnalysis
 
         public Boolean Equals(TypeIdentifierName other)
         {
-            return Parts.Equals(other.Parts);
+            return Parts.SequenceEqual(other.Parts);
         }
 
         public override Int32 GetHashCode()
