@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace RhoMicro.CodeAnalysis
 {
-	public readonly struct TypeIdentifier : IEquatable<TypeIdentifier>
+	internal readonly struct TypeIdentifier : IEquatable<TypeIdentifier>
 	{
 		public readonly TypeIdentifierName Name;
 		public readonly Namespace Namespace;

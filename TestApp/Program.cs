@@ -2,11 +2,13 @@
 using Microsoft.CodeAnalysis.CSharp;
 using RhoMicro.CodeAnalysis;
 using RhoMicro.CodeAnalysis.Attributes;
+using System;
+using System.Linq;
 
 namespace TestApp
 {
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-	public class TestAttribute : Attribute
+	internal class TestAttribute : Attribute
 	{
 		public TestAttribute(String stringParameter = "DefaultParameterValue")
 		{
@@ -27,7 +29,7 @@ namespace TestApp
 	[Test(objectParameter: null)]
 	[Test(arrayParameter: new Char[] { 'a', 'b' })]
 	[Test(stringParameter: "ab")]
-	public class TestClass
+	internal class TestClass
 	{
 		private const string ConstantField = "ConstantValue";
 		public void TestMethod()
@@ -35,26 +37,26 @@ namespace TestApp
 
 		}
 	}
-	public class Program
+	internal class Program
 	{
 		private static readonly TypeIdentifierName TestAttributeIdentifierName = TypeIdentifierName.CreateAttribute<TestAttribute>();
 		private static readonly Namespace TestAttributeNamespace = Namespace.Create<TestAttribute>();
 		private static readonly TypeIdentifier TestAttributeIdentifier = TypeIdentifier.Create(TestAttributeIdentifierName, TestAttributeNamespace);
 
-		private static readonly AttributeParameterDefinition StringDefinition = new(null, null, 0, false);
-		private static readonly AttributeParameter<String> StringParameter = new(new[] { StringDefinition });
+		private static readonly AttributeParameterDefinition StringDefinition = new AttributeParameterDefinition(null, null, 0, false);
+		private static readonly AttributeParameter<String> StringParameter = new AttributeParameter<string>(new[] { StringDefinition });
 
-		private static readonly AttributeParameterDefinition Int32Definition = new(null, null, 1, false);
-		private static readonly AttributeParameter<Int32> Int32Parameter = new(new[] { Int32Definition });
+		private static readonly AttributeParameterDefinition Int32Definition = new AttributeParameterDefinition(null, null, 1, false);
+		private static readonly AttributeParameter<Int32> Int32Parameter = new AttributeParameter<int>(new[] { Int32Definition });
 
-		private static readonly AttributeParameterDefinition TypeDefinition = new(null, null, 2, false);
-		private static readonly TypeIdentifierAttributeParameter TypeParameter = new(new[] { TypeDefinition });
+		private static readonly AttributeParameterDefinition TypeDefinition = new AttributeParameterDefinition(null, null, 2, false);
+		private static readonly TypeIdentifierAttributeParameter TypeParameter = new TypeIdentifierAttributeParameter(new[] { TypeDefinition });
 
-		private static readonly AttributeParameterDefinition ArrayDefinition = new(null, null, 3, false);
-		private static readonly ArrayAttributeParameter<Byte> ArrayParameter = new(ArrayDefinition);
+		private static readonly AttributeParameterDefinition ArrayDefinition = new AttributeParameterDefinition(null, null, 3, false);
+		private static readonly ArrayAttributeParameter<Byte> ArrayParameter = new ArrayAttributeParameter<byte>(ArrayDefinition);
 
-		private static readonly AttributeParameterDefinition ObjectDefinition = new(null, null, 4, false);
-		private static readonly AttributeParameter<Object> ObjectParameter = new(ObjectDefinition);
+		private static readonly AttributeParameterDefinition ObjectDefinition = new AttributeParameterDefinition(null, null, 4, false);
+		private static readonly AttributeParameter<Object> ObjectParameter = new AttributeParameter<object>(ObjectDefinition);
 
 		static void Main(string[] args)
 		{
@@ -89,7 +91,7 @@ namespace TestApp
 namespace TestNamespace
 {
 	[Test(ConstantField,32,typeof(uint), new byte[] {(byte)2, (byte)4, (byte)6}, null)]
-	public class TestClass
+	internal class TestClass
 	{
 		private const string Prefix = ""Prefixed"";
 		private const string ConstantField = Prefix + nameof(ConstantField);

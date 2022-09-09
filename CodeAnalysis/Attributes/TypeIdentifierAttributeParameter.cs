@@ -4,7 +4,7 @@ using System;
 
 namespace RhoMicro.CodeAnalysis.Attributes
 {
-	public sealed class TypeIdentifierAttributeParameter : AttributeParameter<TypeIdentifier>
+	internal sealed class TypeIdentifierAttributeParameter : AttributeParameter<TypeIdentifier>
 	{
 		public TypeIdentifierAttributeParameter(params AttributeParameterDefinition[] definitions) : base(definitions)
 		{

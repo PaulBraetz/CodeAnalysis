@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace RhoMicro.CodeAnalysis
 {
-	public readonly struct TypeIdentifierName : IEquatable<TypeIdentifierName>
+	internal readonly struct TypeIdentifierName : IEquatable<TypeIdentifierName>
 	{
 		public readonly ImmutableArray<IdentifierPart> Parts;
 

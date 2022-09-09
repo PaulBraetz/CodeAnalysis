@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace RhoMicro.CodeAnalysis.Attributes
 {
-	public sealed class AttributeAnnotation
+	internal sealed class AttributeAnnotation
 	{
 		public AttributeAnnotation(AttributeSyntax a, ImmutableArray<AttributeParameterBase> parameters, Compilation compilation)
 		{

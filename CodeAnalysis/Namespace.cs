@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace RhoMicro.CodeAnalysis
 {
-	public readonly struct Namespace : IEquatable<Namespace>
+	internal readonly struct Namespace : IEquatable<Namespace>
 	{
 		private Namespace(ImmutableArray<IdentifierPart> parts)
 		{

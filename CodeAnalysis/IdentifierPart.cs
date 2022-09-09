@@ -2,7 +2,7 @@
 
 namespace RhoMicro.CodeAnalysis
 {
-	public readonly struct IdentifierPart
+	internal readonly struct IdentifierPart
 	{
 		public enum PartKind : Byte
 		{

@@ -4,7 +4,7 @@ using System;
 
 namespace RhoMicro.CodeAnalysis.Attributes
 {
-	public class ArrayAttributeParameter<T> : AttributeParameter<T[]>
+	internal class ArrayAttributeParameter<T> : AttributeParameter<T[]>
 	{
 		public ArrayAttributeParameter(params AttributeParameterDefinition[] definitions) : base(definitions)
 		{

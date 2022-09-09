@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace RhoMicro.CodeAnalysis.Attributes
 {
-	public sealed class AttributeDefinition
+	internal sealed class AttributeDefinition
 	{
 		public AttributeDefinition(TypeIdentifier identifier, params AttributeParameterBase[] parameters)
 		{

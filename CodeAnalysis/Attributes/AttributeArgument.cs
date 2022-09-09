@@ -5,22 +5,7 @@ using System.Text;
 
 namespace RhoMicro.CodeAnalysis.Attributes
 {
-	public abstract class AttributeArgumentBase
-	{
-		public AttributeArgumentBase(AttributeParameterDefinition matchedDefinition, Boolean isEmpty) : this(isEmpty)
-		{
-			MatchedDefinition = matchedDefinition;
-		}
-		private AttributeArgumentBase(Boolean isEmpty)
-		{
-			IsEmpty = isEmpty;
-		}
-
-		public AttributeParameterDefinition MatchedDefinition { get; }
-		public Boolean IsEmpty { get; }
-		public Boolean IsValid => MatchedDefinition.IsOptional || !IsEmpty;
-	}
-	public sealed class AttributeArgument<T> : AttributeArgumentBase, IEquatable<AttributeArgument<T>>
+	internal sealed class AttributeArgument<T> : AttributeArgumentBase, IEquatable<AttributeArgument<T>>
 	{
 		public AttributeArgument(AttributeParameterDefinition matchedDefinition, T value) : base(matchedDefinition, false)
 		{

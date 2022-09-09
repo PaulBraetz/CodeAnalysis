@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RhoMicro.CodeAnalysis.Attributes
 {
-	public readonly struct AttributeParameterDefinition : IEquatable<AttributeParameterDefinition>
+	internal readonly struct AttributeParameterDefinition : IEquatable<AttributeParameterDefinition>
 	{
 		public readonly string Property;
 		public readonly string Parameter;

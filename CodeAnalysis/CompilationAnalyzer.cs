@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace RhoMicro.CodeAnalysis
 {
-	public static class CompilationAnalysis
+	internal static class CompilationAnalysis
 	{
 		public static IEnumerable<BaseTypeDeclarationSyntax> GetTypeDeclarations(Compilation compilation, IEnumerable<TypeIdentifier> include = null, IEnumerable<TypeIdentifier> exclude = null)
 		{
