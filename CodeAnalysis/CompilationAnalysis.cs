@@ -5,6 +5,7 @@ using RhoMicro.CodeAnalysis.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace RhoMicro.CodeAnalysis
 {
@@ -91,13 +92,17 @@ namespace RhoMicro.CodeAnalysis
 		{
 			var availableUsings = GetAvailableUsings(node);
 			var usingNamespace = availableUsings.Contains(attributeIdentifier.Namespace);
+			var requestedName = usingNamespace ? attributeIdentifier.Name.ToString() : attributeIdentifier.ToString();
+			var requestedAbbreviatedName = Regex.Replace(requestedName, @"Attribute$", String.Empty);
 
 			return attributeLists.SelectMany(al => al.Attributes).Any(equals);
 
 			Boolean equals(AttributeSyntax attributeSyntax)
 			{
-				return attributeSyntax.Name.ToString() == attributeIdentifier.ToString() ||
-					usingNamespace && attributeSyntax.Name.ToString() == attributeIdentifier.Name.ToString();
+				var attributeName = attributeSyntax.Name.ToString();
+
+				return attributeName == requestedName ||
+					attributeName == requestedAbbreviatedName;
 			}
 		}
 

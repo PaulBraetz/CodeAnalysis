@@ -15,14 +15,6 @@ namespace RhoMicro.CodeAnalysis
 			Parts = parts;
 		}
 
-		public static TypeIdentifierName CreateAttribute<T>()
-		{
-			return CreateAttribute(typeof(T));
-		}
-		public static TypeIdentifierName CreateAttribute(Type type)
-		{
-			return Create().WithNamePart(Regex.Replace(type.Name, @"Attribute$", String.Empty));
-		}
 		public static TypeIdentifierName Create<T>()
 		{
 			return Create(typeof(T));

@@ -39,7 +39,7 @@ namespace TestApp
 	}
 	internal class Program
 	{
-		private static readonly TypeIdentifierName TestAttributeIdentifierName = TypeIdentifierName.CreateAttribute<TestAttribute>();
+		private static readonly TypeIdentifierName TestAttributeIdentifierName = TypeIdentifierName.Create<TestAttribute>();
 		private static readonly Namespace TestAttributeNamespace = Namespace.Create<TestAttribute>();
 		private static readonly TypeIdentifier TestAttributeIdentifier = TypeIdentifier.Create(TestAttributeIdentifierName, TestAttributeNamespace);
 
@@ -66,7 +66,7 @@ namespace TestApp
 
 			var definition = new AttributeDefinition(TestAttributeIdentifier, StringParameter, Int32Parameter, TypeParameter, ArrayParameter, ObjectParameter);
 
-			var typeDeclaration = CompilationAnalysis.GetTypeDeclarations(compilation, new[] { TestAttributeIdentifier }).Single();
+			var typeDeclaration = CompilationAnalysis.GetTypeDeclarations(compilation,include: new[] { TestAttributeIdentifier }).Single();
 
 			var declaration = CompilationAnalysis.GetAttributes(typeDeclaration.AttributeLists, typeDeclaration, compilation, new[] { definition }).Single();
 

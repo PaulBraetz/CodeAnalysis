@@ -15,7 +15,7 @@
 		<Compile Include="..\CodeAnalysis\Attributes\AttributeParameterBase.cs" Link="RhoMicro.CodeAnalysis\Attributes\AttributeParameterBase.cs" />
 		<Compile Include="..\CodeAnalysis\Attributes\AttributeParameterDefinition.cs" Link="RhoMicro.CodeAnalysis\Attributes\AttributeParameterDefinition.cs" />
 		<Compile Include="..\CodeAnalysis\Attributes\TypeIdentifierAttributeParameter.cs" Link="RhoMicro.CodeAnalysis\Attributes\TypeIdentifierAttributeParameter.cs" />
-		<Compile Include="..\CodeAnalysis\CompilationAnalyzer.cs" Link="RhoMicro.CodeAnalysis\CompilationAnalyzer.cs" />
+		<Compile Include="..\CodeAnalysis\CompilationAnalysis.cs" Link="RhoMicro.CodeAnalysis\CompilationAnalysis.cs" />
 		<Compile Include="..\CodeAnalysis\GeneratedSource.cs" Link="RhoMicro.CodeAnalysis\GeneratedSource.cs" />
 		<Compile Include="..\CodeAnalysis\IdentifierPart.cs" Link="RhoMicro.CodeAnalysis\IdentifierPart.cs" />
 		<Compile Include="..\CodeAnalysis\Namespace.cs" Link="RhoMicro.CodeAnalysis\Namespace.cs" />
