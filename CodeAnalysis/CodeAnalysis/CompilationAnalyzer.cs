@@ -1,180 +1,154 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RhoMicro.CodeAnalysis.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace RhoMicro.CodeAnalysis
 {
-    internal sealed class CompilationAnalyzer
-    {
-        private readonly Compilation _compilation;
-        public IEnumerable<BaseTypeDeclarationSyntax> TypeDeclarations { get; }
+	public static class CompilationAnalysis
+	{
+		public static IEnumerable<BaseTypeDeclarationSyntax> GetTypeDeclarations(Compilation compilation, IEnumerable<TypeIdentifier> include = null, IEnumerable<TypeIdentifier> exclude = null)
+		{
+			var typeDeclarations = compilation.SyntaxTrees.Select(s => s.GetRoot())
+				.SelectMany(r => r.DescendantNodes(n => !(n is BaseTypeDeclarationSyntax)))
+				.OfType<BaseTypeDeclarationSyntax>();
 
-        public CompilationAnalyzer(Compilation compilation)
-        {
-            _compilation = compilation;
+			if (include == null)
+			{
+				include = Array.Empty<TypeIdentifier>();
+			}
 
-            TypeDeclarations = _compilation.SyntaxTrees.SelectMany(t => t.GetRoot().DescendantNodes().OfType<TypeDeclarationSyntax>()).ToArray();
-        }
+			if (exclude == null)
+			{
+				exclude = Array.Empty<TypeIdentifier>();
+			}
 
-        public IEnumerable<BaseTypeDeclarationSyntax> GetTypeDeclarations(IEnumerable<TypeIdentifier> include = null, IEnumerable<TypeIdentifier> exclude = null)
-        {
-            var typeDeclarations = TypeDeclarations;
+			if (!exclude.Any() && !include.Any())
+			{
+				return typeDeclarations;
+			}
 
-            if (include == null)
-            {
-                include = Array.Empty<TypeIdentifier>();
-            }
-            if (exclude == null)
-            {
-                exclude = Array.Empty<TypeIdentifier>();
-            }
-            if(!exclude.Any() && !include.Any())
-            {
-                return typeDeclarations;
-            }
+			return typeDeclarations.Where(d => !exclude.Any(a => HasAttribute(d.AttributeLists, d, a)) && include.Any(a => HasAttribute(d.AttributeLists, d, a)));
+		}
 
-            return typeDeclarations.Where(d => !exclude.Any(a => HasAttribute(d.AttributeLists, d, a)) && include.Any(a => HasAttribute(d.AttributeLists, d, a)));
-        }
+		public static IEnumerable<FieldDeclarationSyntax> GetFieldDeclarations(BaseTypeDeclarationSyntax typeDeclaration, IEnumerable<TypeIdentifier> include = null, IEnumerable<TypeIdentifier> exclude = null)
+		{
+			var fields = typeDeclaration.ChildNodes().OfType<FieldDeclarationSyntax>();
 
-        public IEnumerable<FieldDeclarationSyntax> GetFieldDeclarations(BaseTypeDeclarationSyntax typeDeclaration, IEnumerable<TypeIdentifier> include = null, IEnumerable<TypeIdentifier> exclude = null)
-        {
-            var fields = typeDeclaration.ChildNodes().OfType<FieldDeclarationSyntax>();
+			if (include == null)
+			{
+				include = Array.Empty<TypeIdentifier>();
+			}
 
-            if (include == null)
-            {
-                include = Array.Empty<TypeIdentifier>();
-            }
-            if (exclude == null)
-            {
-                exclude = Array.Empty<TypeIdentifier>();
-            }
-            if (!exclude.Any() && !include.Any())
-            {
-                return fields;
-            }
+			if (exclude == null)
+			{
+				exclude = Array.Empty<TypeIdentifier>();
+			}
 
-            return fields.Where(d => !exclude.Any(a => HasAttribute(d.AttributeLists, d, a)) && include.Any(a => HasAttribute(d.AttributeLists, d, a)));
-        }
+			if (!exclude.Any() && !include.Any())
+			{
+				return fields;
+			}
 
-        public IEnumerable<PropertyDeclarationSyntax> GetPropertyDeclarations(BaseTypeDeclarationSyntax typeDeclaration, IEnumerable<TypeIdentifier> include = null, IEnumerable<TypeIdentifier> exclude = null)
-        {
-            var properties = typeDeclaration.ChildNodes().OfType<PropertyDeclarationSyntax>();
+			return fields.Where(d => !exclude.Any(a => HasAttribute(d.AttributeLists, d, a)) && include.Any(a => HasAttribute(d.AttributeLists, d, a)));
+		}
 
-            if (include == null)
-            {
-                include = Array.Empty<TypeIdentifier>();
-            }
-            if (exclude == null)
-            {
-                exclude = Array.Empty<TypeIdentifier>();
-            }
-            if (!exclude.Any() && !include.Any())
-            {
-                return properties;
-            }
+		public static IEnumerable<PropertyDeclarationSyntax> GetPropertyDeclarations(BaseTypeDeclarationSyntax typeDeclaration, IEnumerable<TypeIdentifier> include = null, IEnumerable<TypeIdentifier> exclude = null)
+		{
+			var properties = typeDeclaration.ChildNodes().OfType<PropertyDeclarationSyntax>();
 
-            return properties.Where(d => !exclude.Any(a => HasAttribute(d.AttributeLists, d, a)) && include.Any(a => HasAttribute(d.AttributeLists, d, a)));
-        }
+			if (include == null)
+			{
+				include = Array.Empty<TypeIdentifier>();
+			}
 
-        public TypeIdentifier GetTypeArgumentOrDefault(SyntaxList<AttributeListSyntax> attributeLists, SyntaxNode node, TypeIdentifier attributeIdentifier)
-        {
-            return GetTypeArguments(attributeLists, node, attributeIdentifier).SingleOrDefault();
-        }
-        public IEnumerable<TypeIdentifier> GetTypeArguments(SyntaxList<AttributeListSyntax> attributeLists, SyntaxNode node, TypeIdentifier attributeIdentifier)
-        {
-            if (TryGetAttributes(attributeLists, node, attributeIdentifier, out var attributes))
-            {
-                var modelTypeSyntaxes = attributes.SelectMany(a => a.DescendantNodes()).OfType<TypeOfExpressionSyntax>().Select(e => e.Type);
-                var arguments = modelTypeSyntaxes.Select(GetTypeIdentifier);
+			if (exclude == null)
+			{
+				exclude = Array.Empty<TypeIdentifier>();
+			}
 
-                return arguments;
-            }
+			if (!exclude.Any() && !include.Any())
+			{
+				return properties;
+			}
 
-            return Array.Empty<TypeIdentifier>();
-        }
-        public Boolean TryGetAttributes(SyntaxList<AttributeListSyntax> attributeLists, SyntaxNode node, TypeIdentifier attributeIdentifier, out IEnumerable<AttributeSyntax> attributes)
-        {
-            var availableUsings = GetAvailableUsings(node);
-            var usingNamespace = availableUsings.Contains(attributeIdentifier.Namespace);
+			return properties.Where(d => !exclude.Any(a => HasAttribute(d.AttributeLists, d, a)) && include.Any(a => HasAttribute(d.AttributeLists, d, a)));
+		}
 
-            attributes = attributeLists.SelectMany(al => al.Attributes).Where(a => equals(a));
+		public static IEnumerable<AttributeAnnotation> GetAttributes(SyntaxList<AttributeListSyntax> attributeLists, SyntaxNode node, Compilation compilation, IEnumerable<AttributeDefinition> definitions)
+		{
+			var declarations = definitions
+				.Where(d => HasAttribute(attributeLists, node, d.Identifier))
+				.SelectMany(d => d.Parse(attributeLists, compilation));
 
-            return attributes.Any();
+			return declarations;
+		}
 
-            Boolean equals(AttributeSyntax attributeSyntax)
-            {
-                return attributeSyntax.Name.ToString() == attributeIdentifier.ToString() ||
-                    usingNamespace && attributeSyntax.Name.ToString() == attributeIdentifier.Name.ToString();
+		public static Boolean HasAttribute(SyntaxList<AttributeListSyntax> attributeLists, SyntaxNode node, TypeIdentifier attributeIdentifier)
+		{
+			var availableUsings = GetAvailableUsings(node);
+			var usingNamespace = availableUsings.Contains(attributeIdentifier.Namespace);
 
-            }
-        }
+			return attributeLists.SelectMany(al => al.Attributes).Any(equals);
 
-        public Boolean HasAttribute(SyntaxList<AttributeListSyntax> attributeLists, SyntaxNode node, TypeIdentifier attributeIdentifier)
-        {
-            var availableUsings = GetAvailableUsings(node);
-            var usingNamespace = availableUsings.Contains(attributeIdentifier.Namespace);
+			Boolean equals(AttributeSyntax attributeSyntax)
+			{
+				return attributeSyntax.Name.ToString() == attributeIdentifier.ToString() ||
+					usingNamespace && attributeSyntax.Name.ToString() == attributeIdentifier.Name.ToString();
+			}
+		}
 
-            return attributeLists.SelectMany(al => al.Attributes).Any(equals);
+		public static IEnumerable<Namespace> GetAvailableUsings(SyntaxNode node)
+		{
+			var result = new List<Namespace>();
 
-            Boolean equals(AttributeSyntax attributeSyntax)
-            {
-                return attributeSyntax.Name.ToString() == attributeIdentifier.ToString() ||
-                    usingNamespace && attributeSyntax.Name.ToString() == attributeIdentifier.Name.ToString();
+			while (node.Parent != null)
+			{
+				var namespaces = node.Parent.ChildNodes().OfType<UsingDirectiveSyntax>();
 
-            }
-        }
+				foreach (var @namespace in namespaces)
+				{
+					var item = Namespace.Create()
+						.WithRange(@namespace.Name.ToString().Split('.'));
 
-        public IEnumerable<Namespace> GetAvailableUsings(SyntaxNode node)
-        {
-            var result = new List<Namespace>();
+					result.Add(item);
+				}
 
-            while (node.Parent != null)
-            {
-                var namespaces = node.Parent.ChildNodes().OfType<UsingDirectiveSyntax>();
+				node = node.Parent;
+			}
 
-                foreach (var @namespace in namespaces)
-                {
-                    var item = Namespace.Create()
-                        .WithRange(@namespace.Name.ToString().Split('.'));
+			return result;
+		}
 
-                    result.Add(item);
-                }
+		public static TypeIdentifier GetTypeIdentifier(TypeSyntax type, Compilation compilation)
+		{
+			var semanticModel = compilation.GetSemanticModel(type.SyntaxTree);
+			var symbol = semanticModel.GetDeclaredSymbol(type) as ITypeSymbol ?? semanticModel.GetTypeInfo(type).Type;
 
-                node = node.Parent;
-            }
+			var identifier = TypeIdentifier.Create(symbol);
 
-            return result;
-        }
+			return identifier;
+		}
+		public static TypeIdentifier GetTypeIdentifier(PropertyDeclarationSyntax property, Compilation compilation)
+		{
+			var semanticModel = compilation.GetSemanticModel(property.SyntaxTree);
+			var symbol = semanticModel.GetDeclaredSymbol(property).Type;
 
-        public TypeIdentifier GetTypeIdentifier(TypeSyntax type)
-        {
-            var semanticModel = _compilation.GetSemanticModel(type.SyntaxTree);
-            var symbol = semanticModel.GetDeclaredSymbol(type) as ITypeSymbol ?? semanticModel.GetTypeInfo(type).Type;
+			var identifier = TypeIdentifier.Create(symbol);
 
-            var identifier = TypeIdentifier.Create(symbol);
+			return identifier;
+		}
+		public static TypeIdentifier GetTypeIdentifier(BaseTypeDeclarationSyntax declaration, Compilation compilation)
+		{
+			var semanticModel = compilation.GetSemanticModel(declaration.SyntaxTree);
+			var symbol = semanticModel.GetDeclaredSymbol(declaration);
 
-            return identifier;
-        }
-        public TypeIdentifier GetTypeIdentifier(PropertyDeclarationSyntax property)
-        {
-            var semanticModel = _compilation.GetSemanticModel(property.SyntaxTree);
-            var symbol = semanticModel.GetDeclaredSymbol(property).Type;
+			var identifier = TypeIdentifier.Create(symbol);
 
-            var identifier = TypeIdentifier.Create(symbol);
-
-            return identifier;
-        }
-        public TypeIdentifier GetTypeIdentifier(BaseTypeDeclarationSyntax declaration)
-        {
-            var semanticModel = _compilation.GetSemanticModel(declaration.SyntaxTree);
-            var symbol = semanticModel.GetDeclaredSymbol(declaration);
-
-            var identifier = TypeIdentifier.Create(symbol);
-
-            return identifier;
-        }
-    }
+			return identifier;
+		}
+	}
 }
