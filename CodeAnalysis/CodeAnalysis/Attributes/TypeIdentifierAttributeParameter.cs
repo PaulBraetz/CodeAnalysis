@@ -20,6 +20,7 @@ namespace RhoMicro.CodeAnalysis.Attributes
 					return true;
 				}
 			}
+
 			return false;
 		}
 	}

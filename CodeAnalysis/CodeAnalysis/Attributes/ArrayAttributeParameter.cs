@@ -21,7 +21,7 @@ namespace RhoMicro.CodeAnalysis.Attributes
 					for (var i = 0; i < itemCount; i++)
 					{
 						var item = arrayCreationExpression.Initializer.Expressions[i];
-						if (TryGetConstantValue<T>(item, compilation, out T castElement))
+						if (TryGetConstantValue<T>(item, compilation, out var castElement))
 						{
 							result[i] = castElement;
 						}
@@ -30,10 +30,12 @@ namespace RhoMicro.CodeAnalysis.Attributes
 							return false;
 						}
 					}
+
 					value = result;
 					return true;
 				}
 			}
+
 			return false;
 		}
 	}

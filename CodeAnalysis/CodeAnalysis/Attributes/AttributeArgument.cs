@@ -35,16 +35,18 @@ namespace RhoMicro.CodeAnalysis.Attributes
 
 		public override String ToString()
 		{
-			StringBuilder valueString = new StringBuilder(Value == null ? "null" : Value is String ? $"\"{Value}\"" : Value.ToString());
+			var valueString = new StringBuilder(Value == null ? "null" : Value is String ? $"\"{Value}\"" : Value.ToString());
 			if (!(Value is String) && Value is IEnumerable enumerable)
 			{
-				valueString.Clear().Append("{");
+				_ = valueString.Clear().Append("{");
 				foreach (var enumerableItem in enumerable)
 				{
-					valueString.Append(enumerableItem?.ToString()).Append(", ");
+					_ = valueString.Append(enumerableItem?.ToString()).Append(", ");
 				}
-				valueString.Remove(valueString.Length - 2, 2).Append("}");
+
+				_ = valueString.Remove(valueString.Length - 2, 2).Append("}");
 			}
+
 			return IsValid ? $"{{T: {typeof(T)}, Value: {(IsEmpty ? "Empty" : $"{valueString}}}")}" : "Invalid";
 		}
 
