@@ -21,6 +21,13 @@ namespace RhoMicro.CodeAnalysis
 		public readonly GeneratedSource Source;
 		public readonly TypeIdentifier Identifier;
 
+		public INamedTypeSymbol ExtractSymbol(Compilation compilation)
+		{
+			var symbol = compilation.GetTypeByMetadataName(Identifier.ToString());
+
+			return symbol;
+		}
+
 		public override String ToString()
 		{
 			return $"Generated Type: {Identifier}";

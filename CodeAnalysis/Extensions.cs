@@ -28,7 +28,7 @@ namespace RhoMicro.CodeAnalysis
 
 		public static void AddSource(this GeneratorPostInitializationContext context, GeneratedSource source)
 		{
-			context.AddSource(source.HintName, source.Source);
+			context.AddSource(source.HintName, source.Text);
 		}
 		public static void AddSources(this GeneratorPostInitializationContext context, IEnumerable<GeneratedSource> sources)
 		{
@@ -47,7 +47,7 @@ namespace RhoMicro.CodeAnalysis
 
 		public static void AddSource(this GeneratorExecutionContext context, GeneratedSource source)
 		{
-			context.AddSource(source.HintName, source.Source);
+			context.AddSource(source.HintName, source.Text);
 		}
 		public static void AddSources(this GeneratorExecutionContext context, IEnumerable<GeneratedSource> sources)
 		{

@@ -6,6 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Include="..\CodeAnalysis\AttributeAnalysisUnit.cs" Link="RhoMicro.CodeAnalysis\AttributeAnalysisUnit.cs" />
 	  <Compile Include="..\CodeAnalysis\AttributeFactory.cs" Link="RhoMicro.CodeAnalysis\AttributeFactory.cs" />
 	  <Compile Include="..\CodeAnalysis\AttributeFactoryCollection.cs" Link="RhoMicro.CodeAnalysis\AttributeFactoryCollection.cs" />
 	  <Compile Include="..\CodeAnalysis\Extensions.cs" Link="RhoMicro.CodeAnalysis\Extensions.cs" />

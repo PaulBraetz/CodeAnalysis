@@ -7,7 +7,7 @@ namespace RhoMicro.CodeAnalysis
 {
 	internal readonly struct GeneratedSource : IEquatable<GeneratedSource>
 	{
-		public readonly String Source;
+		public readonly String Text;
 		public readonly String HintName;
 
 		public GeneratedSource(String source, String fileName)
@@ -17,7 +17,7 @@ namespace RhoMicro.CodeAnalysis
 // {DateTimeOffset.Now}
 {source}";
 
-			Source = CSharpSyntaxTree.ParseText(source)
+			Text = CSharpSyntaxTree.ParseText(source)
 				.GetRoot()
 				.NormalizeWhitespace()
 				.ToFullString();
@@ -32,14 +32,14 @@ namespace RhoMicro.CodeAnalysis
 
 		public Boolean Equals(GeneratedSource other)
 		{
-			return Source == other.Source &&
+			return Text == other.Text &&
 				   HintName == other.HintName;
 		}
 
 		public override Int32 GetHashCode()
 		{
 			var hashCode = 854157587;
-			hashCode = hashCode * -1521134295 + EqualityComparer<String>.Default.GetHashCode(Source);
+			hashCode = hashCode * -1521134295 + EqualityComparer<String>.Default.GetHashCode(Text);
 			hashCode = hashCode * -1521134295 + EqualityComparer<String>.Default.GetHashCode(HintName);
 			return hashCode;
 		}
@@ -56,7 +56,7 @@ namespace RhoMicro.CodeAnalysis
 
 		public override String ToString()
 		{
-			return Source;
+			return Text;
 		}
 	}
 }
