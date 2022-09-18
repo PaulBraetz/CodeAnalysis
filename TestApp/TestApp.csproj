@@ -6,30 +6,20 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="..\CodeAnalysis\Attributes\ArrayAttributeParameter.cs" Link="RhoMicro.CodeAnalysis\Attributes\ArrayAttributeParameter.cs" />
-		<Compile Include="..\CodeAnalysis\Attributes\AttributeArgument.cs" Link="RhoMicro.CodeAnalysis\Attributes\AttributeArgument.cs" />
-		<Compile Include="..\CodeAnalysis\Attributes\AttributeArgumentBase.cs" Link="RhoMicro.CodeAnalysis\Attributes\AttributeArgumentBase.cs" />
-		<Compile Include="..\CodeAnalysis\Attributes\AttributeDeclaration.cs" Link="RhoMicro.CodeAnalysis\Attributes\AttributeDeclaration.cs" />
-		<Compile Include="..\CodeAnalysis\Attributes\AttributeDefinition.cs" Link="RhoMicro.CodeAnalysis\Attributes\AttributeDefinition.cs" />
-		<Compile Include="..\CodeAnalysis\Attributes\AttributeParameter.cs" Link="RhoMicro.CodeAnalysis\Attributes\AttributeParameter.cs" />
-		<Compile Include="..\CodeAnalysis\Attributes\AttributeParameterBase.cs" Link="RhoMicro.CodeAnalysis\Attributes\AttributeParameterBase.cs" />
-		<Compile Include="..\CodeAnalysis\Attributes\AttributeParameterDefinition.cs" Link="RhoMicro.CodeAnalysis\Attributes\AttributeParameterDefinition.cs" />
-		<Compile Include="..\CodeAnalysis\Attributes\TypeIdentifierAttributeParameter.cs" Link="RhoMicro.CodeAnalysis\Attributes\TypeIdentifierAttributeParameter.cs" />
-		<Compile Include="..\CodeAnalysis\CompilationAnalysis.cs" Link="RhoMicro.CodeAnalysis\CompilationAnalysis.cs" />
-		<Compile Include="..\CodeAnalysis\GeneratedSource.cs" Link="RhoMicro.CodeAnalysis\GeneratedSource.cs" />
-		<Compile Include="..\CodeAnalysis\IdentifierPart.cs" Link="RhoMicro.CodeAnalysis\IdentifierPart.cs" />
-		<Compile Include="..\CodeAnalysis\Namespace.cs" Link="RhoMicro.CodeAnalysis\Namespace.cs" />
-		<Compile Include="..\CodeAnalysis\Extensions.cs" Link="RhoMicro.CodeAnalysis\Extensions.cs" />
-		<Compile Include="..\CodeAnalysis\TypeIdentifier.cs" Link="RhoMicro.CodeAnalysis\TypeIdentifier.cs" />
-		<Compile Include="..\CodeAnalysis\TypeIdentifierName.cs" Link="RhoMicro.CodeAnalysis\TypeIdentifierName.cs" />
+	  <Compile Include="..\CodeAnalysis\AttributeFactory.cs" Link="RhoMicro.CodeAnalysis\AttributeFactory.cs" />
+	  <Compile Include="..\CodeAnalysis\AttributeFactoryCollection.cs" Link="RhoMicro.CodeAnalysis\AttributeFactoryCollection.cs" />
+	  <Compile Include="..\CodeAnalysis\Extensions.cs" Link="RhoMicro.CodeAnalysis\Extensions.cs" />
+	  <Compile Include="..\CodeAnalysis\GeneratedSource.cs" Link="RhoMicro.CodeAnalysis\GeneratedSource.cs" />
+	  <Compile Include="..\CodeAnalysis\GeneratedType.cs" Link="RhoMicro.CodeAnalysis\GeneratedType.cs" />
+	  <Compile Include="..\CodeAnalysis\IAttributeFactory.cs" Link="RhoMicro.CodeAnalysis\IAttributeFactory.cs" />
+	  <Compile Include="..\CodeAnalysis\IdentifierPart.cs" Link="RhoMicro.CodeAnalysis\IdentifierPart.cs" />
+	  <Compile Include="..\CodeAnalysis\Namespace.cs" Link="RhoMicro.CodeAnalysis\Namespace.cs" />
+	  <Compile Include="..\CodeAnalysis\TypeIdentifier.cs" Link="RhoMicro.CodeAnalysis\TypeIdentifier.cs" />
+	  <Compile Include="..\CodeAnalysis\TypeIdentifierName.cs" Link="RhoMicro.CodeAnalysis\TypeIdentifierName.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis" Version="4.3.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="RhoMicro.CodeAnalysis\Attributes\" />
 	</ItemGroup>
 
 </Project>

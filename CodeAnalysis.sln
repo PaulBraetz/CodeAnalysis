@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32811.315
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeAnalysis", "CodeAnalysis\CodeAnalysis.csproj", "{24A473E6-A15B-4C18-B2A3-0B5AF19259D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{483F1835-257F-4CE2-9A6F-67768DF5E182}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp", "TestApp\TestApp.csproj", "{483F1835-257F-4CE2-9A6F-67768DF5E182}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RhoMicro.CodeAnalysis;
 using RhoMicro.CodeAnalysis.Attributes;
 using System;
@@ -10,87 +11,84 @@ namespace TestApp
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 	internal class TestAttribute : Attribute
 	{
-		public TestAttribute(String stringParameter = "DefaultParameterValue")
+		public TestAttribute()
 		{
-
 		}
-		public TestAttribute(Char[] arrayParameter = null)
+		public TestAttribute(char[] arrayParameter, object objectParameter, string stringParameter = "Default Value")
 		{
-
+			ObjectProperty = objectParameter;
+			ArrayProperty = arrayParameter;
+			StringProperty = stringParameter;
 		}
-		public TestAttribute(Object objectParameter = null)
+		public TestAttribute(object objectParameter, char[] arrayParameter, string stringParameter)
 		{
-
+			ObjectProperty = objectParameter;
+			ArrayProperty = arrayParameter;
+			StringProperty = stringParameter;
 		}
 
-		public String StringProperty { get; set; } = "DefaultPropertyValue";
+		public object ObjectProperty { get; set; } = "DefaultObjectValue";
+		public char[] ArrayProperty { get; set; } = new char[] { 'a', 'b', 'c' };
+		public string StringProperty { get; set; } = "DefaultPropertyValue";
 	}
 
-	[Test(objectParameter: null)]
-	[Test(arrayParameter: new Char[] { 'a', 'b' })]
-	[Test(stringParameter: "ab")]
-	internal class TestClass
-	{
-		private const string ConstantField = "ConstantValue";
-		public void TestMethod()
-		{
-
-		}
-	}
 	internal class Program
 	{
 		private static readonly TypeIdentifierName TestAttributeIdentifierName = TypeIdentifierName.Create<TestAttribute>();
 		private static readonly Namespace TestAttributeNamespace = Namespace.Create<TestAttribute>();
 		private static readonly TypeIdentifier TestAttributeIdentifier = TypeIdentifier.Create(TestAttributeIdentifierName, TestAttributeNamespace);
 
-		private static readonly AttributeParameterDefinition StringDefinition = new AttributeParameterDefinition(null, null, 0, false);
-		private static readonly AttributeParameter<String> StringParameter = new AttributeParameter<string>(new[] { StringDefinition });
-
-		private static readonly AttributeParameterDefinition Int32Definition = new AttributeParameterDefinition(null, null, 1, false);
-		private static readonly AttributeParameter<Int32> Int32Parameter = new AttributeParameter<int>(new[] { Int32Definition });
-
-		private static readonly AttributeParameterDefinition TypeDefinition = new AttributeParameterDefinition(null, null, 2, false);
-		private static readonly TypeIdentifierAttributeParameter TypeParameter = new TypeIdentifierAttributeParameter(new[] { TypeDefinition });
-
-		private static readonly AttributeParameterDefinition ArrayDefinition = new AttributeParameterDefinition(null, null, 3, false);
-		private static readonly ArrayAttributeParameter<Byte> ArrayParameter = new ArrayAttributeParameter<byte>(ArrayDefinition);
-
-		private static readonly AttributeParameterDefinition ObjectDefinition = new AttributeParameterDefinition(null, null, 4, false);
-		private static readonly AttributeParameter<Object> ObjectParameter = new AttributeParameter<object>(ObjectDefinition);
-
 		static void Main(string[] args)
 		{
+			//Console.WriteLine(String.Join("\n", Enumerable.Range(1, 1).Subsets().Select(s => $"[{String.Join(", ", s)}]")));
+			//return;
+
 			var compilation = CSharpCompilation.Create("TestAssembly")
 				.AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location))
 				.AddSyntaxTrees(CSharpSyntaxTree.ParseText(TestClass));
 
-			var definition = new AttributeDefinition(TestAttributeIdentifier, StringParameter, Int32Parameter, TypeParameter, ArrayParameter, ObjectParameter);
+			var type = compilation.SyntaxTrees.Select(t => t.GetRoot())
+				.SelectMany(t => t.DescendantNodes(n => !(n is BaseTypeDeclarationSyntax)))
+				.OfType<BaseTypeDeclarationSyntax>()
+				.ToArray()[1];
 
-			var typeDeclaration = CompilationAnalysis.GetTypeDeclarations(compilation,include: new[] { TestAttributeIdentifier }).Single();
+			var semanticModel = compilation.GetSemanticModel(type.SyntaxTree);
 
-			var declaration = CompilationAnalysis.GetAttributes(typeDeclaration.AttributeLists, typeDeclaration, compilation, new[] { definition }).Single();
+			var attribute = type.AttributeLists.SelectMany(al => al.Attributes).OfAttributeClasses(semanticModel, TypeIdentifier.Create<TestAttribute>()).Single();
 
-			var stringArg = declaration.GetArgument<String>(StringDefinition);
-			Console.WriteLine(stringArg);
+			IAttributeFactory<TestAttribute> factory = AttributeFactory<TestAttribute>.Create();
 
-			var intArg = declaration.GetArgument<Int32>(Int32Definition);
-			Console.WriteLine(intArg);
-
-			var typeArg = declaration.GetArgument<TypeIdentifier>(TypeDefinition);
-			Console.WriteLine(typeArg);
-
-			var arrayArg = declaration.GetArgument<Byte[]>(ArrayDefinition);
-			Console.WriteLine(arrayArg);
-
-			var objectArg = declaration.GetArgument<Object>(ObjectDefinition);
-			Console.WriteLine(objectArg);
+			factory.TryBuild(attribute, semanticModel, out TestAttribute attributeInstance);
 		}
 
 		private const String TestClass =
-@"using TestApp;
-namespace TestNamespace
+@"namespace TestApp
 {
-	[Test(ConstantField,32,typeof(uint), new byte[] {(byte)2, (byte)4, (byte)6}, null)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+	internal class TestAttribute : Attribute
+	{
+		public TestAttribute()
+		{
+		}
+		public TestAttribute(char[] arrayParameter, object objectParameter, string stringParameter = ""Default Value"")
+		{
+			ObjectProperty = objectParameter;
+			ArrayProperty = arrayParameter;
+			StringProperty = stringParameter;
+		}
+		public TestAttribute(object objectParameter, char[] arrayParameter, string stringParameter)
+		{
+			ObjectProperty = objectParameter;
+			ArrayProperty = arrayParameter;
+			StringProperty = stringParameter;
+		}
+
+		public object ObjectProperty { get; set; } = ""DefaultObjectValue"";
+		public char[] ArrayProperty { get; set; } = new char[] { 'a', 'b', 'c' };
+		public string StringProperty { get; set; } = ""DefaultPropertyValue"";
+	}
+
+	[Test(/*new char[] { 'd', 'e', 'f', 'g' },*/ ObjectProperty= new object(), StringProperty = ""Property Assigned String Value"")]
 	internal class TestClass
 	{
 		private const string Prefix = ""Prefixed"";
