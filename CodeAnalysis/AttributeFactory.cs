@@ -68,7 +68,7 @@ namespace RhoMicro.CodeAnalysis.Attributes
 							Expression noArgReactionExpr = null;
 							if (parameter.HasDefaultValue)
 							{
-								noArgReactionExpr = Expression.Assign(outValue, Expression.Constant(parameter.DefaultValue));
+								noArgReactionExpr = Expression.Assign(outValue, Expression.Convert(Expression.Constant(parameter.DefaultValue), parameter.ParameterType));
 							}
 							else
 							{
