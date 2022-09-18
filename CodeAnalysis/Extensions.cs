@@ -221,8 +221,8 @@ namespace RhoMicro.CodeAnalysis
 
 		public static Optional<Object> GetArgument(this AttributeSyntax attribute, SemanticModel semanticModel, Int32 position = -1, String propertyName = null, String parameterName = null)
 		{
-			var argmuents = attribute.ArgumentList.Arguments;
-			foreach (var argument in argmuents)
+			var arguments = (IEnumerable<AttributeArgumentSyntax>)attribute.ArgumentList?.Arguments ?? Array.Empty<AttributeArgumentSyntax>();
+			foreach (var argument in arguments)
 			{
 				if (argument.NameEquals != null)
 				{
