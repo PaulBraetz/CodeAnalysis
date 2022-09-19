@@ -22,7 +22,7 @@ namespace RhoMicro.CodeAnalysis
 		public static TypeIdentifier Create(Type type)
 		{
 			var name = TypeIdentifierName.Create();
-			Namespace @namespace = Namespace.Create();
+			var @namespace = Namespace.Create();
 
 			if (type.IsNested)
 			{
@@ -51,7 +51,6 @@ namespace RhoMicro.CodeAnalysis
 			}
 
 			return Create(name, @namespace);
-
 		}
 		public static TypeIdentifier Create(ITypeSymbol symbol)
 		{
@@ -99,6 +98,11 @@ namespace RhoMicro.CodeAnalysis
 		public static Boolean operator !=(TypeIdentifier left, TypeIdentifier right)
 		{
 			return !(left == right);
+		}
+
+		public static implicit operator String(TypeIdentifier identifier)
+		{
+			return identifier.ToString();
 		}
 	}
 }

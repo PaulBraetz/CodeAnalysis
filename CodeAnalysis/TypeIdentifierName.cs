@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace RhoMicro.CodeAnalysis
 {
@@ -172,6 +171,11 @@ namespace RhoMicro.CodeAnalysis
 		public static Boolean operator !=(TypeIdentifierName left, TypeIdentifierName right)
 		{
 			return !(left == right);
+		}
+
+		public static implicit operator String(TypeIdentifierName name)
+		{
+			return name.ToString();
 		}
 	}
 }
