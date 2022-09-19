@@ -134,11 +134,16 @@ namespace RhoMicro.CodeAnalysis
 
 			return foundAttributes;
 		}
+		public static IEnumerable<AttributeSyntax> OfAttributeClasses(this IEnumerable<AttributeListSyntax> attributeLists, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
+		{
+			var requiredTypes = new HashSet<String>(identifiers.Select(i => i.ToString()));
+			var foundAttributes = attributeLists.SelectMany(al=>al.Attributes).Where(a => requiredTypes.Contains(semanticModel.GetTypeInfo(a).Type?.ToDisplayString()));
+
+			return foundAttributes;
+		}
 		public static Boolean HasAttributes(this IEnumerable<AttributeListSyntax> attributeLists, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
 		{
-			var attributes = attributeLists.SelectMany(al => al.Attributes);
-
-			var match = attributes.OfAttributeClasses(semanticModel, identifiers).Any();
+			var match = attributeLists.OfAttributeClasses(semanticModel, identifiers).Any();
 
 			return match;
 		}
