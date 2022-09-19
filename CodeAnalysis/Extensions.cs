@@ -185,6 +185,12 @@ namespace RhoMicro.CodeAnalysis
 					value = default;
 					return true;
 				}
+				try
+				{
+					value = (T)constant.Value;
+					return true;
+				}
+				catch { }
 			}
 
 			value = default;
