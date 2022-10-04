@@ -123,7 +123,7 @@ namespace RhoMicro.CodeAnalysis
 		{
 			return Parts.IsDefaultOrEmpty ?
 				other.Parts.IsDefaultOrEmpty :
-				Parts.SequenceEqual(other.Parts);
+				!other.Parts.IsDefaultOrEmpty && Parts.SequenceEqual(other.Parts);
 		}
 
 		public override Int32 GetHashCode()

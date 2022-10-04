@@ -26,7 +26,7 @@ namespace RhoMicro.CodeAnalysis
 
 			if (type.IsNested)
 			{
-				var parentType = type.Assembly.GetTypes().Single(t => t.GetNestedType(type.FullName) != null);
+				var parentType = type.DeclaringType;
 				var parentTypeIdentifier = Create(parentType);
 				name = name.AppendTypePart(parentTypeIdentifier.Name);
 				@namespace = parentTypeIdentifier.Namespace;
