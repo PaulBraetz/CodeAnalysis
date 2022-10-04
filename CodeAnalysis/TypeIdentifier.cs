@@ -32,7 +32,17 @@ namespace RhoMicro.CodeAnalysis
 				@namespace = parentTypeIdentifier.Namespace;
 			}
 
-			name = name.AppendNamePart(type.Name);
+			var typeName = type.Name;
+			if (type.IsGenericType)
+			{
+				var iBacktick = typeName.IndexOf('`');
+				if (iBacktick > 0)
+				{
+					typeName = typeName.Remove(iBacktick);
+				}
+			}
+
+			name = name.AppendNamePart(typeName);
 
 			if (type.IsConstructedGenericType)
 			{

@@ -1,6 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -67,6 +69,19 @@ namespace RhoMicro.CodeAnalysis
 		public static INamedTypeSymbol GetSymbol(this Compilation compilation, TypeIdentifier identifier)
 		{
 			return compilation.GetTypeByMetadataName(identifier.ToString());
+		}
+
+		public static TypeSyntax AsSyntax(this TypeIdentifier typeIdentifier)
+		{
+			var syntax = SyntaxFactory.ParseTypeName(typeIdentifier);
+
+			return syntax;
+		}
+		public static TypeSyntax AsSyntax(this Type type)
+		{
+			var syntax = TypeIdentifier.Create(type).AsSyntax();
+
+			return syntax;
 		}
 
 		#region AttributeSyntax Operations
@@ -137,7 +152,7 @@ namespace RhoMicro.CodeAnalysis
 		public static IEnumerable<AttributeSyntax> OfAttributeClasses(this IEnumerable<AttributeListSyntax> attributeLists, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
 		{
 			var requiredTypes = new HashSet<String>(identifiers.Select(i => i.ToString()));
-			var foundAttributes = attributeLists.SelectMany(al=>al.Attributes).Where(a => requiredTypes.Contains(semanticModel.GetTypeInfo(a).Type?.ToDisplayString()));
+			var foundAttributes = attributeLists.SelectMany(al => al.Attributes).Where(a => requiredTypes.Contains(semanticModel.GetTypeInfo(a).Type?.ToDisplayString()));
 
 			return foundAttributes;
 		}

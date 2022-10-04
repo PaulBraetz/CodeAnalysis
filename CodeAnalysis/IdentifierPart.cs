@@ -74,5 +74,10 @@ namespace RhoMicro.CodeAnalysis
 		{
 			return _string ?? String.Empty;
 		}
+
+		public static implicit operator String(IdentifierPart @namespace)
+		{
+			return @namespace.ToString();
+		}
 	}
 }
