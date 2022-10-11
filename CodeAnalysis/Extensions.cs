@@ -13,6 +13,13 @@ namespace RhoMicro.CodeAnalysis
 {
 	internal static class Extensions
 	{
+		public static String ToNonGenericString(this TypeIdentifier identifier)
+		{
+			var result = String.Concat(identifier.Namespace.Parts.Append(IdentifierPart.Period()).Concat(identifier.Name.Parts.TakeWhile(p => p.Kind == IdentifierPart.PartKind.Name || p.Kind == IdentifierPart.PartKind.Period)));
+
+			return result;
+		}
+
 		public static IEnumerable<IEnumerable<T>> Subsets<T>(this IEnumerable<T> collection)
 		{
 			var arr = collection.ToArray();

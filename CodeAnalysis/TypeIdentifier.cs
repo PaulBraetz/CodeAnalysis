@@ -64,8 +64,12 @@ namespace RhoMicro.CodeAnalysis
 		}
 		public static TypeIdentifier Create(ITypeSymbol symbol)
 		{
-			var identifier = TypeIdentifierName.Create(symbol);
-			var @namespace = Namespace.Create(symbol);
+			var identifier = symbol is ITypeParameterSymbol parameter?
+				 TypeIdentifierName.Create().AppendNamePart(parameter.Name):
+				 TypeIdentifierName.Create(symbol);
+			var @namespace = symbol is ITypeParameterSymbol?
+				Namespace.Create():
+				Namespace.Create(symbol);
 
 			return Create(identifier, @namespace);
 		}
