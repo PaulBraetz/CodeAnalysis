@@ -189,11 +189,12 @@ namespace RhoMicro.CodeAnalysis.Attributes
 						{
 							var methodParams = m.GetParameters();
 							return m.Name == nameof(Extensions.Matches) &&
-								methodParams.Length == 2 &&
+								methodParams.Length == 3 &&
 								methodParams[0].ParameterType == typeof(AttributeSyntax) &&
-								methodParams[1].ParameterType == typeof(ConstructorInfo);
+								methodParams[1].ParameterType == typeof(SemanticModel) &&
+								methodParams[2].ParameterType == typeof(ConstructorInfo);
 						});
-					var matchesCall = Expression.Call(null, matchesMethod, parameters[0], indexAccessExpr);
+					var matchesCall = Expression.Call(null, matchesMethod, parameters[0], parameters[1], indexAccessExpr);
 
 					return matchesCall;
 				}

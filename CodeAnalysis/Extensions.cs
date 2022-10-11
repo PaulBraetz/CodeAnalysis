@@ -92,13 +92,20 @@ namespace RhoMicro.CodeAnalysis
 		}
 
 		#region AttributeSyntax Operations
-		public static Boolean Matches(this AttributeSyntax attribute, ConstructorInfo constructor)
+		public static Boolean Matches(this AttributeSyntax attribute, SemanticModel semanticModel, ConstructorInfo constructor)
 		{
 			var arguments = (IEnumerable<AttributeArgumentSyntax>)attribute.ArgumentList?.Arguments ?? Array.Empty<AttributeArgumentSyntax>();
 
-			var match = matchesParameters() && matchesProperties();
+			var match = matchesType() && matchesParameters() && matchesProperties();
 
 			return match;
+
+			Boolean matchesType()
+			{
+				var typeMatch = attribute.IsType(semanticModel, TypeIdentifier.Create(constructor.DeclaringType));
+
+				return typeMatch;
+			}
 
 			Boolean matchesParameters()
 			{
