@@ -1,83 +1,98 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace RhoMicro.CodeAnalysis
 {
-	internal readonly struct IdentifierPart
+	internal readonly struct IdentifierPart : IIdentifierPart, IEquatable<IdentifierPart>
 	{
-		public enum PartKind : Byte
-		{
-			None,
-			Array,
-			GenericOpen,
-			GenericClose,
-			Comma,
-			Period,
-			Name
-		}
+		public IdentifierParts.Kind Kind { get; }
+		public String Value { get; }
 
-		public readonly PartKind Kind;
-		private readonly String _string;
-
-		private IdentifierPart(String name, PartKind kind)
+		private IdentifierPart(String name, IdentifierParts.Kind kind)
 		{
 			Kind = kind;
 
 			switch (Kind)
 			{
-				case PartKind.Array:
-					_string = "[]";
+				case IdentifierParts.Kind.Array:
+					Value = "[]";
 					break;
-				case PartKind.GenericOpen:
-					_string = "<";
+				case IdentifierParts.Kind.GenericOpen:
+					Value = "<";
 					break;
-				case PartKind.GenericClose:
-					_string = ">";
+				case IdentifierParts.Kind.GenericClose:
+					Value = ">";
 					break;
-				case PartKind.Period:
-					_string = ".";
+				case IdentifierParts.Kind.Period:
+					Value = ".";
 					break;
-				case PartKind.Comma:
-					_string = ", ";
+				case IdentifierParts.Kind.Comma:
+					Value = ", ";
 					break;
 				default:
-					_string = name;
+					Value = name;
 					break;
 			}
 		}
-		private IdentifierPart(PartKind kind) : this(null, kind) { }
+		private IdentifierPart(IdentifierParts.Kind kind) : this(null, kind) { }
 
 		public static IdentifierPart Name(String name)
 		{
-			return new IdentifierPart(name, PartKind.Name);
+			return new IdentifierPart(name, IdentifierParts.Kind.Name);
 		}
 		public static IdentifierPart Array()
 		{
-			return new IdentifierPart(PartKind.Array);
+			return new IdentifierPart(IdentifierParts.Kind.Array);
 		}
 		public static IdentifierPart GenericOpen()
 		{
-			return new IdentifierPart(PartKind.GenericOpen);
+			return new IdentifierPart(IdentifierParts.Kind.GenericOpen);
 		}
 		public static IdentifierPart GenericClose()
 		{
-			return new IdentifierPart(PartKind.GenericClose);
+			return new IdentifierPart(IdentifierParts.Kind.GenericClose);
 		}
 		public static IdentifierPart Period()
 		{
-			return new IdentifierPart(PartKind.Period);
+			return new IdentifierPart(IdentifierParts.Kind.Period);
 		}
 		public static IdentifierPart Comma()
 		{
-			return new IdentifierPart(PartKind.Comma);
+			return new IdentifierPart(IdentifierParts.Kind.Comma);
 		}
 		public override String ToString()
 		{
-			return _string ?? String.Empty;
+			return Value ?? String.Empty;
+		}
+
+		public override Boolean Equals(Object obj)
+		{
+			return obj is IdentifierPart part && Equals(part);
+		}
+
+		public Boolean Equals(IdentifierPart other)
+		{
+			return Value == other.Value;
+		}
+
+		public override Int32 GetHashCode()
+		{
+			return -1937169414 + EqualityComparer<String>.Default.GetHashCode(Value);
 		}
 
 		public static implicit operator String(IdentifierPart @namespace)
 		{
 			return @namespace.ToString();
+		}
+
+		public static Boolean operator ==(IdentifierPart left, IdentifierPart right)
+		{
+			return left.Equals(right);
+		}
+
+		public static Boolean operator !=(IdentifierPart left, IdentifierPart right)
+		{
+			return !(left == right);
 		}
 	}
 }

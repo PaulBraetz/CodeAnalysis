@@ -33,7 +33,20 @@ An error has occured:
 		{
 			return new Error(Exceptions.AddRange(exceptions));
 		}
-
+		public Error WithFlattened(Exception exception)
+		{
+			return With(Flatten(exception).ToArray());
+		}
+		public Error WithFlattened(params Exception[] exceptions)
+		{
+			return With(exceptions.SelectMany(Flatten).ToArray());
+		}
+		private static IEnumerable<Exception> Flatten(Exception exception)
+		{
+			return exception is AggregateException aggregateException
+				? aggregateException.InnerExceptions.SelectMany(Flatten)
+				: (new[] { exception });
+		}
 		public override String ToString()
 		{
 			return _string;

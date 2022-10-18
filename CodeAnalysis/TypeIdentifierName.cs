@@ -5,11 +5,11 @@ using System.Linq;
 
 namespace RhoMicro.CodeAnalysis
 {
-	internal readonly struct TypeIdentifierName : IEquatable<TypeIdentifierName>
+	internal readonly struct TypeIdentifierName : IEquatable<TypeIdentifierName>, ITypeIdentifierName
 	{
-		public readonly ImmutableArray<IdentifierPart> Parts;
+		public ImmutableArray<IIdentifierPart> Parts { get; }
 
-		private TypeIdentifierName(ImmutableArray<IdentifierPart> parts)
+		private TypeIdentifierName(ImmutableArray<IIdentifierPart> parts)
 		{
 			Parts = parts;
 		}
@@ -43,7 +43,7 @@ namespace RhoMicro.CodeAnalysis
 
 			if (symbol is INamedTypeSymbol namedSymbol && namedSymbol.TypeArguments.Any())
 			{
-				var arguments = new TypeIdentifier[namedSymbol.TypeArguments.Length];
+				var arguments = new ITypeIdentifier[namedSymbol.TypeArguments.Length];
 
 				for (var i = 0; i < arguments.Length; i++)
 				{
@@ -73,29 +73,29 @@ namespace RhoMicro.CodeAnalysis
 		}
 		public static TypeIdentifierName Create()
 		{
-			return new TypeIdentifierName(ImmutableArray<IdentifierPart>.Empty);
+			return new TypeIdentifierName(ImmutableArray<IIdentifierPart>.Empty);
 		}
 
-		public TypeIdentifierName AppendTypePart(TypeIdentifierName type)
+		public TypeIdentifierName AppendTypePart(ITypeIdentifierName type)
 		{
-			var parts = GetNextParts(IdentifierPart.PartKind.Name)
+			var parts = GetNextParts(IdentifierParts.Kind.Name)
 				.AddRange(type.Parts);
 
 			return new TypeIdentifierName(parts);
 		}
 		public TypeIdentifierName AppendNamePart(String name)
 		{
-			var parts = GetNextParts(IdentifierPart.PartKind.Name)
+			var parts = GetNextParts(IdentifierParts.Kind.Name)
 				.Add(IdentifierPart.Name(name));
 
 			return new TypeIdentifierName(parts);
 		}
-		public TypeIdentifierName AppendGenericPart(TypeIdentifier[] arguments)
+		public TypeIdentifierName AppendGenericPart(ITypeIdentifier[] arguments)
 		{
-			var parts = GetNextParts(IdentifierPart.PartKind.GenericOpen)
+			var parts = GetNextParts(IdentifierParts.Kind.GenericOpen)
 				.Add(IdentifierPart.GenericOpen());
 
-			var typesArray = arguments ?? Array.Empty<TypeIdentifier>();
+			var typesArray = arguments ?? Array.Empty<ITypeIdentifier>();
 
 			for (var i = 0; i < typesArray.Length; i++)
 			{
@@ -121,17 +121,17 @@ namespace RhoMicro.CodeAnalysis
 		}
 		public TypeIdentifierName AppendArrayPart()
 		{
-			var parts = GetNextParts(IdentifierPart.PartKind.Array).Add(IdentifierPart.Array());
+			var parts = GetNextParts(IdentifierParts.Kind.Array).Add(IdentifierPart.Array());
 			return new TypeIdentifierName(parts);
 		}
 
-		private ImmutableArray<IdentifierPart> GetNextParts(IdentifierPart.PartKind nextKind)
+		private ImmutableArray<IIdentifierPart> GetNextParts(IdentifierParts.Kind nextKind)
 		{
 			var lastKind = Parts.LastOrDefault().Kind;
 
-			var prependSeparator = nextKind == IdentifierPart.PartKind.Name &&
-										(lastKind == IdentifierPart.PartKind.GenericOpen ||
-										lastKind == IdentifierPart.PartKind.Name);
+			var prependSeparator = nextKind == IdentifierParts.Kind.Name &&
+									(lastKind == IdentifierParts.Kind.GenericOpen ||
+									lastKind == IdentifierParts.Kind.Name);
 
 			if (prependSeparator)
 			{

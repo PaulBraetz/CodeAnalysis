@@ -4,12 +4,12 @@ using System.Linq;
 
 namespace RhoMicro.CodeAnalysis
 {
-	internal readonly struct TypeIdentifier : IEquatable<TypeIdentifier>
+	internal readonly struct TypeIdentifier : IEquatable<TypeIdentifier>, ITypeIdentifier
 	{
-		public readonly TypeIdentifierName Name;
-		public readonly Namespace Namespace;
+		public ITypeIdentifierName Name { get; }
+		public INamespace Namespace { get; }
 
-		private TypeIdentifier(TypeIdentifierName name, Namespace @namespace)
+		private TypeIdentifier(ITypeIdentifierName name, INamespace @namespace)
 		{
 			Name = name;
 			Namespace = @namespace;
@@ -24,7 +24,7 @@ namespace RhoMicro.CodeAnalysis
 		public static TypeIdentifier Create(Type type)
 		{
 			var name = TypeIdentifierName.Create();
-			var @namespace = Namespace.Create();
+			INamespace @namespace = CodeAnalysis.Namespace.Create();
 
 			if (type.IsNested)
 			{
@@ -48,7 +48,7 @@ namespace RhoMicro.CodeAnalysis
 
 			if (type.IsConstructedGenericType)
 			{
-				var genericArguments = type.GenericTypeArguments.Select(Create).ToArray();
+				var genericArguments = type.GenericTypeArguments.Select(Create).OfType<ITypeIdentifier>().ToArray();
 				name = name.AppendGenericPart(genericArguments);
 			}
 
@@ -59,23 +59,23 @@ namespace RhoMicro.CodeAnalysis
 
 			if (@namespace == default)
 			{
-				@namespace = Namespace.Create(type);
+				@namespace = CodeAnalysis.Namespace.Create(type);
 			}
 
 			return Create(name, @namespace);
 		}
 		public static TypeIdentifier Create(ITypeSymbol symbol)
 		{
-			var identifier = symbol is ITypeParameterSymbol parameter?
-				 TypeIdentifierName.Create().AppendNamePart(parameter.Name):
+			var identifier = symbol is ITypeParameterSymbol parameter ?
+				 TypeIdentifierName.Create().AppendNamePart(parameter.Name) :
 				 TypeIdentifierName.Create(symbol);
-			var @namespace = symbol is ITypeParameterSymbol?
-				Namespace.Create():
-				Namespace.Create(symbol);
+			var @namespace = symbol is ITypeParameterSymbol ?
+				CodeAnalysis.Namespace.Create() :
+				CodeAnalysis.Namespace.Create(symbol);
 
 			return Create(identifier, @namespace);
 		}
-		public static TypeIdentifier Create(TypeIdentifierName name, Namespace @namespace)
+		public static TypeIdentifier Create(ITypeIdentifierName name, INamespace @namespace)
 		{
 			return new TypeIdentifier(name, @namespace);
 		}

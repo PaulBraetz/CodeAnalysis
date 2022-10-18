@@ -6,14 +6,14 @@ using System.Linq;
 
 namespace RhoMicro.CodeAnalysis
 {
-	internal readonly struct Namespace : IEquatable<Namespace>
+	internal readonly struct Namespace : IEquatable<Namespace>, INamespace
 	{
-		private Namespace(ImmutableArray<IdentifierPart> parts)
+		private Namespace(ImmutableArray<IIdentifierPart> parts)
 		{
 			Parts = parts;
 		}
 
-		public readonly ImmutableArray<IdentifierPart> Parts;
+		public ImmutableArray<IIdentifierPart> Parts { get; }
 
 		public static Namespace Create<T>()
 		{
@@ -42,7 +42,7 @@ namespace RhoMicro.CodeAnalysis
 		}
 		public static Namespace Create()
 		{
-			return new Namespace(ImmutableArray.Create<IdentifierPart>());
+			return new Namespace(ImmutableArray.Create<IIdentifierPart>());
 		}
 
 		public Namespace Append(String name)
@@ -88,21 +88,21 @@ namespace RhoMicro.CodeAnalysis
 			return @namespace;
 		}
 
-		private ImmutableArray<IdentifierPart> GetNextParts()
+		private ImmutableArray<IIdentifierPart> GetNextParts()
 		{
 			var lastKind = Parts.LastOrDefault().Kind;
 
-			var prependSeparator = lastKind == IdentifierPart.PartKind.Name;
+			var prependSeparator = lastKind == IdentifierParts.Kind.Name;
 
 			return prependSeparator ?
 				Parts.Add(IdentifierPart.Period()) :
 				Parts;
 		}
-		private ImmutableArray<IdentifierPart> GetPreviousParts()
+		private ImmutableArray<IIdentifierPart> GetPreviousParts()
 		{
 			var firstKind = Parts.FirstOrDefault().Kind;
 
-			var appendSeparator = firstKind == IdentifierPart.PartKind.Name;
+			var appendSeparator = firstKind == IdentifierParts.Kind.Name;
 
 			return appendSeparator ?
 				Parts.Insert(0, IdentifierPart.Period()) :
