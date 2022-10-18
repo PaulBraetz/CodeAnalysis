@@ -15,7 +15,7 @@ namespace RhoMicro.CodeAnalysis
 	{
 		public static String ToNonGenericString(this TypeIdentifier identifier)
 		{
-			var result = String.Concat(identifier.Namespace.Parts.Append(IdentifierPart.Period()).Concat(identifier.Name.Parts.TakeWhile(p => p.Kind == IdentifierPart.PartKind.Name || p.Kind == IdentifierPart.PartKind.Period)));
+			var result = String.Concat(identifier.Namespace.Parts.Append(IdentifierPart.Period()).Concat(identifier.Name.Parts.TakeWhile(p => p.Kind == IdentifierParts.Kind.Name || p.Kind == IdentifierParts.Kind.Period)));
 
 			return result;
 		}
@@ -125,6 +125,7 @@ namespace RhoMicro.CodeAnalysis
 						{
 							return false;
 						}
+
 						namedParameters.Remove(positionalParameter.Name);
 						positionalParameters.Remove(position);
 					}
@@ -135,6 +136,7 @@ namespace RhoMicro.CodeAnalysis
 						{
 							return false;
 						}
+
 						namedParameters.Remove(argumentName);
 						positionalParameters.Remove(positionalParameters.Single(kvp => kvp.Value.Name == argumentName).Key);
 					}
@@ -144,6 +146,7 @@ namespace RhoMicro.CodeAnalysis
 
 				return noneLeft;
 			}
+
 			Boolean matchesProperties()
 			{
 				var properties = constructor.DeclaringType.GetProperties()
@@ -209,11 +212,13 @@ namespace RhoMicro.CodeAnalysis
 					value = castValue;
 					return true;
 				}
+
 				if (constant.Value == null)
 				{
 					value = default;
 					return true;
 				}
+
 				try
 				{
 					value = (T)constant.Value;
@@ -236,7 +241,7 @@ namespace RhoMicro.CodeAnalysis
 			var elements = constant.Value is Object[] objectArray ? objectArray : Array.Empty<Object>();
 			var tempValues = new T[elements.Length];
 
-			for (int i = 0; i < elements.Length; i++)
+			for (var i = 0; i < elements.Length; i++)
 			{
 				var element = elements[i];
 
@@ -306,6 +311,7 @@ namespace RhoMicro.CodeAnalysis
 					return result;
 				}
 			}
+
 			return new Optional<Object>();
 		}
 		#endregion
@@ -397,6 +403,7 @@ namespace RhoMicro.CodeAnalysis
 			{
 				return namedArgument.Value;
 			}
+
 			var positionalArgument = attribute.ConstructorArguments.Skip(position).FirstOrDefault();
 
 			return positionalArgument;
