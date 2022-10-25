@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace RhoMicro.CodeAnalysis
 {
@@ -158,10 +159,20 @@ namespace RhoMicro.CodeAnalysis
 
 		public static IEnumerable<AttributeSyntax> OfAttributeClasses(this IEnumerable<AttributeSyntax> attributes, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
 		{
-			var requiredTypes = new HashSet<String>(identifiers.Select(i => i.ToString()));
+			var requiredTypes = new HashSet<String>(identifiers.SelectMany(getVariations));
 			var foundAttributes = attributes.Where(a => requiredTypes.Contains(semanticModel.GetTypeInfo(a).Type?.ToDisplayString()));
 
 			return foundAttributes;
+
+			IEnumerable<String> getVariations(TypeIdentifier attributeIdentifier)
+			{
+				var baseVariation = attributeIdentifier.ToString();
+				if (baseVariation.EndsWith("Attribute"))
+				{
+					return new[] { baseVariation, baseVariation.Substring(0, baseVariation.Length - "Attribute".Length) };
+				}
+				return new[] { baseVariation };
+			}
 		}
 		public static IEnumerable<AttributeSyntax> OfAttributeClasses(this IEnumerable<AttributeListSyntax> attributeLists, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
 		{

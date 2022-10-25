@@ -22,7 +22,7 @@ namespace RhoMicro.CodeAnalysis
 		public static TypeIdentifier Create(Type type)
 		{
 			var name = TypeIdentifierName.Create();
-			INamespace @namespace = CodeAnalysis.Namespace.Create();
+			INamespace @namespace = null;
 
 			if (type.IsNested)
 			{
@@ -55,7 +55,7 @@ namespace RhoMicro.CodeAnalysis
 				name = name.AppendArrayPart();
 			}
 
-			if (@namespace == default)
+			if (@namespace == null)
 			{
 				@namespace = CodeAnalysis.Namespace.Create(type);
 			}
