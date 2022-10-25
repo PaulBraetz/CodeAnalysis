@@ -15,8 +15,6 @@ namespace RhoMicro.CodeAnalysis
 			Namespace = @namespace;
 		}
 
-		public static TypeIdentifier TemplateAttribute { get; internal set; }
-
 		public static TypeIdentifier Create<T>()
 		{
 			return Create(typeof(T));

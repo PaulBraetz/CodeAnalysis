@@ -1,15 +1,10 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Metadata;
-using System.Xml.Linq;
 
 namespace RhoMicro.CodeAnalysis.Attributes
 {
@@ -36,7 +31,7 @@ namespace RhoMicro.CodeAnalysis.Attributes
 				var buildStrategy = getBuildStrategy();
 				var factory = Create(canBuildStrategy, buildStrategy);
 
-				collection.Add(factory);
+				_ = collection.Add(factory);
 
 				Func<AttributeSyntax, SemanticModel, T> getBuildStrategy()
 				{
@@ -135,6 +130,7 @@ namespace RhoMicro.CodeAnalysis.Attributes
 							return method;
 						}
 					}
+
 					Expression getThrowExpr(String message)
 					{
 						var ctorInfo = typeof(InvalidOperationException).GetConstructor(new[] { typeof(String) });
@@ -146,6 +142,7 @@ namespace RhoMicro.CodeAnalysis.Attributes
 						return throwBlock;
 					}
 				}
+
 				Func<AttributeSyntax, SemanticModel, Boolean> getCanBuildStrategy()
 				{
 					var body = getCanBuildTest();
@@ -155,6 +152,7 @@ namespace RhoMicro.CodeAnalysis.Attributes
 
 					return strategy;
 				}
+
 				Expression getCanBuildTest()
 				{
 					var typeExpr = Expression.Constant(type, typeof(Type));

@@ -2,12 +2,9 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Xml.Linq;
 
 namespace RhoMicro.CodeAnalysis
 {
@@ -126,8 +123,8 @@ namespace RhoMicro.CodeAnalysis
 							return false;
 						}
 
-						namedParameters.Remove(positionalParameter.Name);
-						positionalParameters.Remove(position);
+						_ = namedParameters.Remove(positionalParameter.Name);
+						_ = positionalParameters.Remove(position);
 					}
 					else
 					{
@@ -137,8 +134,8 @@ namespace RhoMicro.CodeAnalysis
 							return false;
 						}
 
-						namedParameters.Remove(argumentName);
-						positionalParameters.Remove(positionalParameters.Single(kvp => kvp.Value.Name == argumentName).Key);
+						_ = namedParameters.Remove(argumentName);
+						_ = positionalParameters.Remove(positionalParameters.Single(kvp => kvp.Value.Name == argumentName).Key);
 					}
 				}
 

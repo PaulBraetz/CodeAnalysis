@@ -90,7 +90,7 @@ namespace RhoMicro.CodeAnalysis
 
 		private ImmutableArray<IIdentifierPart> GetNextParts()
 		{
-			var lastKind = Parts.LastOrDefault().Kind;
+			var lastKind = Parts.LastOrDefault()?.Kind ?? IdentifierParts.Kind.None;
 
 			var prependSeparator = lastKind == IdentifierParts.Kind.Name;
 

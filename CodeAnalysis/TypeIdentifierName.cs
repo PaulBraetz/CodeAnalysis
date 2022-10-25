@@ -127,7 +127,7 @@ namespace RhoMicro.CodeAnalysis
 
 		private ImmutableArray<IIdentifierPart> GetNextParts(IdentifierParts.Kind nextKind)
 		{
-			var lastKind = Parts.LastOrDefault().Kind;
+			var lastKind = Parts.LastOrDefault()?.Kind ?? IdentifierParts.Kind.None;
 
 			var prependSeparator = nextKind == IdentifierParts.Kind.Name &&
 									(lastKind == IdentifierParts.Kind.GenericOpen ||
