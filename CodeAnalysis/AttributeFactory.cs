@@ -49,50 +49,101 @@ namespace RhoMicro.CodeAnalysis.Attributes
 					{
 						var ctorParams = constructor.GetParameters().ToArray();
 
+						var newInstanceExpr = Expression.Variable(type, "instance");
+
 						var blockVariables = new List<ParameterExpression>();
 						var blockExpressions = new List<Expression>();
+						var typeParamSetExpressions = new List<Expression>();
+						var typeParamVariables = new List<ParameterExpression>();
+
+						var implementsTypeParameterSetter = type.TryGetMethodSemantically(typeof(IHasTypeParameter).GetMethod(nameof(IHasTypeParameter.SetTypeParameter)), out var typeParameterSetter);
 
 						for (var i = 0; i < ctorParams.Length; i++)
 						{
 							var parameter = ctorParams[i];
 
-							var tryParseMethod = getTryParseMethod(parameter.ParameterType);
-							var outValue = Expression.Parameter(parameter.ParameterType, $"argumentValue_{parameter.Name}");
-							var callExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(i), Expression.Convert(Expression.Constant(null), typeof(String)), Expression.Constant(parameter.Name));
+							var outValueType = parameter.ParameterType;
+							var tryParseMethod = getTryParseMethod(outValueType);
+							var outValue = Expression.Parameter(outValueType, $"argumentValue_{parameter.Name}");
 
-							Expression noArgReactionExpr = null;
-							if (parameter.HasDefaultValue)
+							blockVariables.Add(outValue);
+
+							Expression paramAssignmentExpr = null;
+
+							if (!(parameter.ParameterType == typeof(Type) && implementsTypeParameterSetter))
 							{
-								noArgReactionExpr = Expression.Assign(outValue, Expression.Convert(Expression.Constant(parameter.DefaultValue), parameter.ParameterType));
+								var callExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(i), Expression.Convert(Expression.Constant(null), typeof(String)), Expression.Constant(parameter.Name));
+
+								Expression noArgReactionExpr = null;
+								if (parameter.HasDefaultValue)
+								{
+									noArgReactionExpr = Expression.Assign(outValue, Expression.Convert(Expression.Constant(parameter.DefaultValue), parameter.ParameterType));
+								}
+								else
+								{
+									noArgReactionExpr = getThrowExpr($"Missing argument for {parameter.Name} of type {parameter.ParameterType} encountered while attempting to construct instance of type {typeof(T)}.");
+								}
+
+								paramAssignmentExpr = Expression.IfThen(Expression.Not(callExpr), noArgReactionExpr);
 							}
 							else
 							{
-								noArgReactionExpr = getThrowExpr($"Missing argument for {parameter.Name} of type {parameter.ParameterType} encountered while attempting to construct instance of type {typeof(T)}.");
+								paramAssignmentExpr = Expression.Assign(outValue, Expression.Convert(Expression.Constant(null), outValueType));
+
+								outValueType = typeof(Object);
+								tryParseMethod = getTryParseMethod(outValueType);
+								outValue = Expression.Parameter(outValueType, $"typeArgumentValue_{parameter.Name}");
+								var callExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(i), Expression.Convert(Expression.Constant(null), typeof(String)), Expression.Constant(parameter.Name));
+								var typeParamSetExpr = Expression.Call(newInstanceExpr, typeParameterSetter, Expression.Constant(parameter.Name), outValue);
+								var conditionalSetExpr = Expression.IfThen(callExpr, typeParamSetExpr);
+
+								typeParamVariables.Add(outValue);
+								typeParamSetExpressions.Add(conditionalSetExpr);
 							}
 
-							var paramAssignmentExpr = Expression.IfThen(Expression.Not(callExpr), noArgReactionExpr);
-
-							blockVariables.Add(outValue);
 							blockExpressions.Add(paramAssignmentExpr);
 						}
 
-						var newInstanceExpr = Expression.Variable(type, "instance");
 						var newExpr = Expression.New(constructor, blockVariables);
 						var newInstanceAssignmentExpr = Expression.Assign(newInstanceExpr, newExpr);
 
+						blockVariables.AddRange(typeParamVariables);
 						blockVariables.Add(newInstanceExpr);
 						blockExpressions.Add(newInstanceAssignmentExpr);
+						blockExpressions.AddRange(typeParamSetExpressions);
+
+						var implementsTypePropertySetter = type.TryGetMethodSemantically(typeof(IHasTypeProperty).GetMethod(nameof(IHasTypeProperty.SetTypeProperty)), out var typePropertySetter);
 
 						for (var i = 0; i < properties.Length; i++)
 						{
 							var property = properties[i];
 
-							var tryParseMethod = getTryParseMethod(property.PropertyType);
-							var outValue = Expression.Parameter(property.PropertyType, $"propertyValue_{property.Name}");
-							var callExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(-1), Expression.Constant(property.Name), Expression.Convert(Expression.Constant(null), typeof(String)));
+							var outValueType = property.PropertyType;
+							ParameterExpression outValue;
+							Expression setConditionExpr;
+							Expression setExpr;
+							if (property.PropertyType == typeof(Type) && implementsTypePropertySetter)
+							{
+								setExpr = Expression.Call(newInstanceExpr, property.SetMethod, Expression.Convert(Expression.Constant(null), outValueType));
 
-							var setExpr = Expression.Call(newInstanceExpr, property.SetMethod, outValue);
-							var setConditionExpr = Expression.IfThen(callExpr, setExpr);
+								outValueType = typeof(Object);
+								var tryParseMethod = getTryParseMethod(outValueType);
+								outValue = Expression.Parameter(outValueType, $"typePropertyValue_{property.Name}");
+								var helperCallExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(-1), Expression.Constant(property.Name), Expression.Convert(Expression.Constant(null), typeof(String)));
+								var helperSetExpr = Expression.Call(newInstanceExpr, typePropertySetter, Expression.Constant(property.Name), outValue);
+
+								var conditionalBlock = Expression.Block(setExpr,helperSetExpr);
+
+								setConditionExpr = Expression.IfThen(helperCallExpr, conditionalBlock);
+							}
+							else
+							{
+								var tryParseMethod = getTryParseMethod(outValueType);
+								outValue = Expression.Parameter(outValueType, $"propertyValue_{property.Name}");
+								var callExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(-1), Expression.Constant(property.Name), Expression.Convert(Expression.Constant(null), typeof(String)));
+								setExpr = Expression.Call(newInstanceExpr, property.SetMethod, outValue);
+								setConditionExpr = Expression.IfThen(callExpr, setExpr);
+							}
 
 							blockVariables.Add(outValue);
 							blockExpressions.Add(setConditionExpr);

@@ -89,6 +89,15 @@ namespace RhoMicro.CodeAnalysis
 			return syntax;
 		}
 
+		public static ITypeIdentifier GetIdentifier(this Type type)
+		{
+			var identifier = type != null ?
+				(ITypeIdentifier)TypeIdentifier.Create(type) :
+				throw new ArgumentNullException(nameof(type));
+
+			return identifier;
+		}
+
 		#region AttributeSyntax Operations
 		public static Boolean Matches(this AttributeSyntax attribute, SemanticModel semanticModel, ConstructorInfo constructor)
 		{
@@ -138,6 +147,12 @@ namespace RhoMicro.CodeAnalysis
 						_ = namedParameters.Remove(argumentName);
 						_ = positionalParameters.Remove(positionalParameters.Single(kvp => kvp.Value.Name == argumentName).Key);
 					}
+
+					if (unmatchedArgument.Expression is TypeOfExpressionSyntax &&
+						!constructor.DeclaringType.ImplementsMethodsSemantically<IHasTypeParameter>())
+					{
+						return false;
+					}
 				}
 
 				var noneLeft = !positionalParameters.Any(kvp => !kvp.Value.IsOptional);
@@ -151,32 +166,40 @@ namespace RhoMicro.CodeAnalysis
 					.Where(p => p.CanWrite)
 					.ToDictionary(p => p.Name, p => p);
 
-				var allValid = arguments.Where(a => a.NameEquals != null).All(a => properties.ContainsKey(a.NameEquals.Name.Identifier.ToString()));
+				var allValid = arguments.Where(a => a.NameEquals != null)
+					.All(a =>
+						properties.ContainsKey(a.NameEquals.Name.Identifier.ToString()) &&
+						(!(a.Expression is TypeOfExpressionSyntax) || constructor.DeclaringType.ImplementsMethodsSemantically<IHasTypeProperty>()));
 
 				return allValid;
 			}
 		}
 
+		public static Boolean TryGetMethodSemantically(this Type type, MethodInfo referenceMethod, out MethodInfo declaredMethod)
+		{
+			declaredMethod = type.GetMethod(referenceMethod.Name,
+											referenceMethod.GetParameters().Select(p => p.ParameterType).ToArray());
+
+			return declaredMethod != null;
+		}
+
+		public static Boolean ImplementsMethodsSemantically<T>(this Type type)
+		{
+			var match = typeof(T).GetMethods().All(rm => type.TryGetMethodSemantically(rm, out var _));
+
+			return match;
+		}
+
 		public static IEnumerable<AttributeSyntax> OfAttributeClasses(this IEnumerable<AttributeSyntax> attributes, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
 		{
-			var requiredTypes = new HashSet<String>(identifiers.SelectMany(getVariations));
+			var requiredTypes = new HashSet<String>(identifiers.SelectMany(GetVariations));
 			var foundAttributes = attributes.Where(a => requiredTypes.Contains(semanticModel.GetTypeInfo(a).Type?.ToDisplayString()));
 
 			return foundAttributes;
-
-			IEnumerable<String> getVariations(TypeIdentifier attributeIdentifier)
-			{
-				var baseVariation = attributeIdentifier.ToString();
-				if (baseVariation.EndsWith("Attribute"))
-				{
-					return new[] { baseVariation, baseVariation.Substring(0, baseVariation.Length - "Attribute".Length) };
-				}
-				return new[] { baseVariation };
-			}
 		}
 		public static IEnumerable<AttributeSyntax> OfAttributeClasses(this IEnumerable<AttributeListSyntax> attributeLists, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
 		{
-			var requiredTypes = new HashSet<String>(identifiers.Select(i => i.ToString()));
+			var requiredTypes = new HashSet<String>(identifiers.SelectMany(GetVariations));
 			var foundAttributes = attributeLists.SelectMany(al => al.Attributes).Where(a => requiredTypes.Contains(semanticModel.GetTypeInfo(a).Type?.ToDisplayString()));
 
 			return foundAttributes;
@@ -315,6 +338,10 @@ namespace RhoMicro.CodeAnalysis
 					{
 						result = new Optional<Object>(new object());
 					}
+					else if (argument.Expression is TypeOfExpressionSyntax typeOfExpression)
+					{
+						result = new Optional<Object>(TypeIdentifier.Create(typeOfExpression.Type, semanticModel));
+					}
 
 					return result;
 				}
@@ -324,98 +351,14 @@ namespace RhoMicro.CodeAnalysis
 		}
 		#endregion
 
-		#region AttributeData Operation
-		public static IEnumerable<AttributeData> OfAttributeClasses(this IEnumerable<AttributeData> attributes, params TypeIdentifier[] identifiers)
+		private static IEnumerable<String> GetVariations(TypeIdentifier attributeIdentifier)
 		{
-			var requiredTypes = new HashSet<String>(identifiers.Select(i => i.ToString()));
-			var foundAttributes = attributes.Where(a => requiredTypes.Contains(a.AttributeClass.ToDisplayString()));
-
-			return foundAttributes;
-		}
-		public static Boolean HasAttributes(this SyntaxNode node, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
-		{
-			var match = semanticModel.GetDeclaredSymbol(node)?.HasAttributes(identifiers)
-				?? throw new ArgumentException($"{nameof(node)} was not declared in {nameof(semanticModel)}.");
-
-			return match;
-		}
-		public static Boolean HasAttributes(this ISymbol symbol, params TypeIdentifier[] identifiers)
-		{
-			var match = symbol.GetAttributes().OfAttributeClasses(identifiers).Any();
-
-			return match;
-		}
-
-		public static Boolean IsType(this AttributeData attribute, TypeIdentifier identifier)
-		{
-			var match = attribute.AttributeClass.ToDisplayString() == identifier.ToString();
-
-			return match;
-		}
-		public static Boolean TryParseArgument<T>(this AttributeData attribute, out T value, Int32 position = -1, String propertyName = null)
-		{
-			var arg = attribute.GetArgument(position, propertyName);
-
-			var result = TryParse(arg, out value);
-
-			return result;
-		}
-		public static Boolean TryParseArrayArgument<T>(this AttributeData attribute, out T[] value, Int32 position = -1, String propertyName = null)
-		{
-			var arg = attribute.GetArgument(position, propertyName);
-
-			var result = TryParseArray(arg, out value);
-
-			return result;
-		}
-
-		public static Boolean TryParse<T>(this TypedConstant constant, out T value)
-		{
-			if (constant.Kind != TypedConstantKind.Error && constant.Kind != TypedConstantKind.Array)
+			var baseVariation = attributeIdentifier.ToString();
+			if (baseVariation.EndsWith("Attribute"))
 			{
-				if (constant.Value is T castValue)
-				{
-					value = castValue;
-					return true;
-				}
+				return new[] { baseVariation, baseVariation.Substring(0, baseVariation.Length - "Attribute".Length) };
 			}
-
-			value = default;
-			return false;
+			return new[] { baseVariation };
 		}
-		public static Boolean TryParseArray<T>(this TypedConstant constant, out T[] values)
-		{
-			if (constant.Kind is TypedConstantKind.Array)
-			{
-				var parseResults = constant.Values
-					.Select(c => (success: TryParse(c, out T value), value))
-					.Where(r => r.success)
-					.Select(r => r.value)
-					.ToArray();
-
-				if (parseResults.Length == constant.Values.Length)
-				{
-					values = parseResults;
-					return true;
-				}
-			}
-
-			values = default;
-			return false;
-		}
-
-		public static TypedConstant GetArgument(this AttributeData attribute, Int32 position = -1, String propertyName = null)
-		{
-			var namedArgument = attribute.NamedArguments.FirstOrDefault(kvp => kvp.Key == propertyName);
-			if (namedArgument.Value.Kind != TypedConstantKind.Error)
-			{
-				return namedArgument.Value;
-			}
-
-			var positionalArgument = attribute.ConstructorArguments.Skip(position).FirstOrDefault();
-
-			return positionalArgument;
-		}
-		#endregion
 	}
 }

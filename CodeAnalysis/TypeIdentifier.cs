@@ -1,5 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace RhoMicro.CodeAnalysis
@@ -62,6 +64,15 @@ namespace RhoMicro.CodeAnalysis
 
 			return Create(name, @namespace);
 		}
+		public static TypeIdentifier Create(TypeSyntax typeSyntax, SemanticModel semanticModel)
+		{
+			var symbol = semanticModel.GetDeclaredSymbol(typeSyntax) as ITypeSymbol ??
+						 semanticModel.GetTypeInfo(typeSyntax).Type;
+
+			var identifier = TypeIdentifier.Create(symbol);
+
+			return identifier;
+		}
 		public static TypeIdentifier Create(ITypeSymbol symbol)
 		{
 			var identifier = symbol is ITypeParameterSymbol parameter ?
@@ -85,8 +96,8 @@ namespace RhoMicro.CodeAnalysis
 
 		public Boolean Equals(TypeIdentifier other)
 		{
-			return Name.Equals(other.Name) &&
-				   Namespace.Equals(other.Namespace);
+			return EqualityComparer<ITypeIdentifierName>.Default.Equals(Name, other.Name) &&
+				   EqualityComparer<INamespace>.Default.Equals(Namespace, other.Namespace);
 		}
 
 		public override Int32 GetHashCode()

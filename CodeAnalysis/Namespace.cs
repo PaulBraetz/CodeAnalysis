@@ -100,7 +100,7 @@ namespace RhoMicro.CodeAnalysis
 		}
 		private ImmutableArray<IIdentifierPart> GetPreviousParts()
 		{
-			var firstKind = Parts.FirstOrDefault().Kind;
+			var firstKind = Parts.FirstOrDefault()?.Kind ?? IdentifierParts.Kind.None;
 
 			var appendSeparator = firstKind == IdentifierParts.Kind.Name;
 
