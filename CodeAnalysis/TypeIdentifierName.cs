@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace RhoMicro.CodeAnalysis
 {
-	internal readonly struct TypeIdentifierName : IEquatable<TypeIdentifierName>, ITypeIdentifierName
+	internal readonly struct TypeIdentifierName : ITypeIdentifierName, IEquatable<ITypeIdentifierName>
 	{
 		public ImmutableArray<IIdentifierPart> Parts { get; }
 
@@ -148,19 +148,17 @@ namespace RhoMicro.CodeAnalysis
 
 		public override Boolean Equals(Object obj)
 		{
-			return obj is TypeIdentifierName name && Equals(name);
+			return obj is ITypeIdentifierName name && Equals(name);
 		}
 
-		public Boolean Equals(TypeIdentifierName other)
+		public Boolean Equals(ITypeIdentifierName other)
 		{
-			return Parts.IsDefaultOrEmpty ?
-				other.Parts.IsDefaultOrEmpty :
-				!other.Parts.IsDefaultOrEmpty && Parts.SequenceEqual(other.Parts);
+			return TypeIdentifierNameEqualityComparer.Instance.Equals(this, other);
 		}
 
 		public override Int32 GetHashCode()
 		{
-			return 666791821 + Parts.GetHashCode();
+			return TypeIdentifierNameEqualityComparer.Instance.GetHashCode(this);
 		}
 
 		public static Boolean operator ==(TypeIdentifierName left, TypeIdentifierName right)

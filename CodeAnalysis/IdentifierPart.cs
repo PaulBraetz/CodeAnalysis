@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RhoMicro.CodeAnalysis
 {
-	internal readonly struct IdentifierPart : IIdentifierPart, IEquatable<IdentifierPart>
+	internal readonly struct IdentifierPart : IIdentifierPart, IEquatable<IIdentifierPart>
 	{
 		public IdentifierParts.Kind Kind { get; }
 		public String Value { get; }
@@ -67,17 +67,17 @@ namespace RhoMicro.CodeAnalysis
 
 		public override Boolean Equals(Object obj)
 		{
-			return obj is IdentifierPart part && Equals(part);
+			return obj is IIdentifierPart identifierPart && Equals(identifierPart);
 		}
 
-		public Boolean Equals(IdentifierPart other)
+		public Boolean Equals(IIdentifierPart other)
 		{
-			return Value == other.Value;
+			return IdentifierPartEqualityComparer.Instance.Equals(this, other);
 		}
 
 		public override Int32 GetHashCode()
 		{
-			return -1937169414 + EqualityComparer<String>.Default.GetHashCode(Value);
+			return IdentifierPartEqualityComparer.Instance.GetHashCode(this);
 		}
 
 		public static implicit operator String(IdentifierPart @namespace)

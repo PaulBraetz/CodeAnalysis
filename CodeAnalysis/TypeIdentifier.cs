@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace RhoMicro.CodeAnalysis
 {
-	internal readonly struct TypeIdentifier : IEquatable<TypeIdentifier>, ITypeIdentifier
+	internal readonly struct TypeIdentifier : ITypeIdentifier, IEquatable<ITypeIdentifier>
 	{
 		public ITypeIdentifierName Name { get; }
 		public INamespace Namespace { get; }
@@ -91,21 +91,17 @@ namespace RhoMicro.CodeAnalysis
 
 		public override Boolean Equals(Object obj)
 		{
-			return obj is TypeIdentifier identifier && Equals(identifier);
+			return obj is ITypeIdentifier identifier && Equals(identifier);
 		}
 
-		public Boolean Equals(TypeIdentifier other)
+		public Boolean Equals(ITypeIdentifier other)
 		{
-			return EqualityComparer<ITypeIdentifierName>.Default.Equals(Name, other.Name) &&
-				   EqualityComparer<INamespace>.Default.Equals(Namespace, other.Namespace);
+			return TypeIdentifierEqualityComparer.Instance.Equals(this, other);
 		}
 
 		public override Int32 GetHashCode()
 		{
-			var hashCode = -179327946;
-			hashCode = hashCode * -1521134295 + Name.GetHashCode();
-			hashCode = hashCode * -1521134295 + Namespace.GetHashCode();
-			return hashCode;
+			return TypeIdentifierEqualityComparer.Instance.GetHashCode(this);
 		}
 
 		public override String ToString()

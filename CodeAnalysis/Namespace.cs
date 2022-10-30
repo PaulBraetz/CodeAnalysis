@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace RhoMicro.CodeAnalysis
 {
-	internal readonly struct Namespace : IEquatable<Namespace>, INamespace
+	internal readonly struct Namespace : INamespace,IEquatable<INamespace>
 	{
 		private Namespace(ImmutableArray<IIdentifierPart> parts)
 		{
@@ -116,19 +116,17 @@ namespace RhoMicro.CodeAnalysis
 
 		public override Boolean Equals(Object obj)
 		{
-			return obj is Namespace @namespace && Equals(@namespace);
+			return obj is INamespace @namespace && Equals(@namespace);
 		}
 
-		public Boolean Equals(Namespace other)
+		public Boolean Equals(INamespace other)
 		{
-			return Parts.IsDefaultOrEmpty ?
-				other.Parts.IsDefaultOrEmpty :
-				!other.Parts.IsDefaultOrEmpty && Parts.SequenceEqual(other.Parts);
+			return NamespaceEqualityComparer.Instance.Equals(this, other);
 		}
 
 		public override Int32 GetHashCode()
 		{
-			return 666791821 + Parts.GetHashCode();
+			return NamespaceEqualityComparer.Instance.GetHashCode(this);
 		}
 
 		public static Boolean operator ==(Namespace left, Namespace right)
