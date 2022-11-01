@@ -351,6 +351,98 @@ namespace RhoMicro.CodeAnalysis
 		}
 		#endregion
 
+		#region AttributeData Operations
+		public static IEnumerable<AttributeData> OfAttributeClasses(this IEnumerable<AttributeData> attributes, params TypeIdentifier[] identifiers)
+		{
+			var requiredTypes = new HashSet<String>(identifiers.Select(i => i.ToString()));
+			var foundAttributes = attributes.Where(a => requiredTypes.Contains(a.AttributeClass.ToDisplayString()));
+
+			return foundAttributes;
+		}
+		public static Boolean HasAttributes(this SyntaxNode node, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
+		{
+			var match = semanticModel.GetDeclaredSymbol(node)?.HasAttributes(identifiers)
+				?? throw new ArgumentException($"{nameof(node)} was not declared in {nameof(semanticModel)}.");
+
+			return match;
+		}
+		public static Boolean HasAttributes(this ISymbol symbol, params TypeIdentifier[] identifiers)
+		{
+			var match = symbol.GetAttributes().OfAttributeClasses(identifiers).Any();
+
+			return match;
+		}
+
+		public static Boolean IsType(this AttributeData attribute, TypeIdentifier identifier)
+		{
+			var match = attribute.AttributeClass.ToDisplayString() == identifier.ToString();
+
+			return match;
+		}
+		public static Boolean TryParseArgument<T>(this AttributeData attribute, out T value, Int32 position = -1, String propertyName = null)
+		{
+			var arg = attribute.GetArgument(position, propertyName);
+
+			var result = TryParse(arg, out value);
+
+			return result;
+		}
+		public static Boolean TryParseArrayArgument<T>(this AttributeData attribute, out T[] value, Int32 position = -1, String propertyName = null)
+		{
+			var arg = attribute.GetArgument(position, propertyName);
+
+			var result = TryParseArray(arg, out value);
+
+			return result;
+		}
+
+		public static Boolean TryParse<T>(this TypedConstant constant, out T value)
+		{
+			if (constant.Kind != TypedConstantKind.Error && constant.Kind != TypedConstantKind.Array)
+			{
+				if (constant.Value is T castValue)
+				{
+					value = castValue;
+					return true;
+				}
+			}
+
+			value = default;
+			return false;
+		}
+		public static Boolean TryParseArray<T>(this TypedConstant constant, out T[] values)
+		{
+			if (constant.Kind is TypedConstantKind.Array)
+			{
+				var parseResults = constant.Values
+					.Select(c => (success: TryParse(c, out T value), value))
+					.Where(r => r.success)
+					.Select(r => r.value)
+					.ToArray();
+
+				if (parseResults.Length == constant.Values.Length)
+				{
+					values = parseResults;
+					return true;
+				}
+			}
+
+			values = default;
+			return false;
+		}
+
+		public static TypedConstant GetArgument(this AttributeData attribute, Int32 position = -1, String propertyName = null)
+		{
+			var namedArgument = attribute.NamedArguments.FirstOrDefault(kvp => kvp.Key == propertyName);
+			if (namedArgument.Value.Kind != TypedConstantKind.Error)
+			{
+				return namedArgument.Value;
+			}
+			var positionalArgument = attribute.ConstructorArguments.Skip(position).FirstOrDefault();
+
+			return positionalArgument;
+		}
+		#endregion
 		private static IEnumerable<String> GetVariations(TypeIdentifier attributeIdentifier)
 		{
 			var baseVariation = attributeIdentifier.ToString();
