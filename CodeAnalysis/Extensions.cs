@@ -269,7 +269,7 @@ namespace RhoMicro.CodeAnalysis
 				return false;
 			}
 
-			var elements = constant.Value is Object[] objectArray ? objectArray : Array.Empty<Object>();
+			var elements = constant.Value is Object[] objectArray ? objectArray : constant.Value is T ? new object[] { constant.Value } : Array.Empty<Object>();
 			var tempValues = new T[elements.Length];
 
 			for (var i = 0; i < elements.Length; i++)

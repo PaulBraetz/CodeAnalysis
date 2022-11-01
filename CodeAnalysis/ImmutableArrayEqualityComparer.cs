@@ -17,10 +17,10 @@ namespace RhoMicro.CodeAnalysis
 
 		public Boolean Equals(ImmutableArray<T> x, ImmutableArray<T> y)
 		{
-			var result = x != null &&
+			var result = x == y ||
+						 x != null &&
 						 y != null &&
-						(x == y ||
-						 x.SequenceEqual(y, _elementComparer));
+						 x.SequenceEqual(y, _elementComparer);
 
 			return result;
 		}

@@ -8,10 +8,10 @@ namespace RhoMicro.CodeAnalysis
 		public static readonly NamespaceEqualityComparer Instance = new NamespaceEqualityComparer();
 		public Boolean Equals(INamespace x, INamespace y)
 		{
-			var result = x != null &&
+			var result = x == y ||
+						 x != null &&
 						 y != null &&
-						(x == y ||
-						 ImmutableArrayEqualityComparer<IIdentifierPart>.Instance.Equals(x.Parts, y.Parts));
+						 ImmutableArrayEqualityComparer<IIdentifierPart>.Instance.Equals(x.Parts, y.Parts);
 
 			return result;
 		}

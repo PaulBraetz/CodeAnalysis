@@ -14,7 +14,7 @@ namespace RhoMicro.CodeAnalysis
 			_string =
 $@"/*
 An error has occured:
-{String.Join("\n\n", exceptions.Select(e => e.ToString()))}
+{String.Join($"\n{Enumerable.Range(0, 25).Select(i => '*')}\n", exceptions.Select((e, i) => $"{i}:\n{e}\n{e.StackTrace}"))}
 */";
 		}
 

@@ -8,10 +8,10 @@ namespace RhoMicro.CodeAnalysis
 		public static readonly IdentifierPartEqualityComparer Instance = new IdentifierPartEqualityComparer();
 		public Boolean Equals(IIdentifierPart x, IIdentifierPart y)
 		{
-			var result = x != null &&
+			var result = x == y ||
+						 x != null &&
 						 y != null &&
-						(x == y ||
-						 x.Value == y.Value);
+						 x.Value == y.Value;
 
 			return result;
 		}

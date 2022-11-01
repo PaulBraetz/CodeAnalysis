@@ -10,11 +10,11 @@ namespace RhoMicro.CodeAnalysis
 		public static readonly TypeIdentifierEqualityComparer Instance = new TypeIdentifierEqualityComparer();
 		public Boolean Equals(ITypeIdentifier x, ITypeIdentifier y)
 		{
-			var result = x != null &&
+			var result = x == y ||
+						 x != null &&
 						 y != null &&
-						(x == y ||
 						 NamespaceEqualityComparer.Instance.Equals(x.Namespace, y.Namespace) &&
-						 TypeIdentifierNameEqualityComparer.Instance.Equals(x.Name, y.Name));
+						 TypeIdentifierNameEqualityComparer.Instance.Equals(x.Name, y.Name);
 
 			return result;
 		}
