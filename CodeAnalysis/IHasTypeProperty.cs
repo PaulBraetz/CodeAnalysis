@@ -1,12 +1,16 @@
-﻿using System;
+﻿/* Unmerged change from project 'AutoForm.Blazor.Analysis'
+Before:
+using System;
 using System.Collections.Generic;
-using System.Text;
+After:
+using System.Collections.Generic;
+*/
 
 namespace RhoMicro.CodeAnalysis
 {
 	internal interface IHasTypeProperty
 	{
-		void SetTypeProperty(String propertyName, Object type);
-		Object GetTypeProperty(String propertyName);
+		void SetTypeProperty(System.String propertyName, System.Object type);
+		System.Object GetTypeProperty(System.String propertyName);
 	}
 }

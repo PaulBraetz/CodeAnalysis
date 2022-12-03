@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace RhoMicro.CodeAnalysis
@@ -28,16 +27,16 @@ namespace RhoMicro.CodeAnalysis
 
 			if (type.IsNested)
 			{
-				var parentType = type.DeclaringType;
-				var parentTypeIdentifier = Create(parentType);
+				Type parentType = type.DeclaringType;
+				TypeIdentifier parentTypeIdentifier = Create(parentType);
 				name = name.AppendTypePart(parentTypeIdentifier.Name);
 				@namespace = parentTypeIdentifier.Namespace;
 			}
 
-			var typeName = type.Name;
+			String typeName = type.Name;
 			if (type.IsGenericType)
 			{
-				var iBacktick = typeName.IndexOf('`');
+				Int32 iBacktick = typeName.IndexOf('`');
 				if (iBacktick > 0)
 				{
 					typeName = typeName.Remove(iBacktick);
@@ -48,7 +47,7 @@ namespace RhoMicro.CodeAnalysis
 
 			if (type.IsConstructedGenericType)
 			{
-				var genericArguments = type.GenericTypeArguments.Select(Create).OfType<ITypeIdentifier>().ToArray();
+				ITypeIdentifier[] genericArguments = type.GenericTypeArguments.Select(Create).OfType<ITypeIdentifier>().ToArray();
 				name = name.AppendGenericPart(genericArguments);
 			}
 
@@ -66,7 +65,7 @@ namespace RhoMicro.CodeAnalysis
 		}
 		public static TypeIdentifier Create(TypeSyntax typeSyntax, SemanticModel semanticModel)
 		{
-			var symbol = semanticModel.GetDeclaredSymbol(typeSyntax) as ITypeSymbol ??
+			ITypeSymbol symbol = semanticModel.GetDeclaredSymbol(typeSyntax) as ITypeSymbol ??
 						 semanticModel.GetTypeInfo(typeSyntax).Type;
 
 			var identifier = TypeIdentifier.Create(symbol);
@@ -75,10 +74,10 @@ namespace RhoMicro.CodeAnalysis
 		}
 		public static TypeIdentifier Create(ITypeSymbol symbol)
 		{
-			var identifier = symbol is ITypeParameterSymbol parameter ?
+			TypeIdentifierName identifier = symbol is ITypeParameterSymbol parameter ?
 				 TypeIdentifierName.Create().AppendNamePart(parameter.Name) :
 				 TypeIdentifierName.Create(symbol);
-			var @namespace = symbol is ITypeParameterSymbol ?
+			Namespace @namespace = symbol is ITypeParameterSymbol ?
 				CodeAnalysis.Namespace.Create() :
 				CodeAnalysis.Namespace.Create(symbol);
 
@@ -106,8 +105,8 @@ namespace RhoMicro.CodeAnalysis
 
 		public override String ToString()
 		{
-			var namespaceString = Namespace.ToString();
-			var nameString = Name.ToString();
+			String namespaceString = Namespace.ToString();
+			String nameString = Name.ToString();
 			return String.IsNullOrEmpty(namespaceString) ? String.IsNullOrEmpty(nameString) ? null : nameString.ToString() : $"{namespaceString}.{nameString}";
 		}
 

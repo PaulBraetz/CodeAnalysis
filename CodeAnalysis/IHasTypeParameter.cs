@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace RhoMicro.CodeAnalysis
+﻿namespace RhoMicro.CodeAnalysis
 {
 	internal interface IHasTypeParameter
 	{
-		void SetTypeParameter(String parameterName, Object type);
-		Object GetTypeParameter(String parameterName);
+		void SetTypeParameter(System.String parameterName, System.Object type);
+		System.Object GetTypeParameter(System.String parameterName);
 	}
 }

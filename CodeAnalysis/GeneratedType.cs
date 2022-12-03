@@ -22,7 +22,7 @@ namespace RhoMicro.CodeAnalysis
 
 		public INamedTypeSymbol ExtractSymbol(Compilation compilation)
 		{
-			var symbol = compilation.GetTypeByMetadataName(Identifier.ToString());
+			INamedTypeSymbol symbol = compilation.GetTypeByMetadataName(Identifier.ToString());
 
 			return symbol;
 		}
@@ -45,7 +45,7 @@ namespace RhoMicro.CodeAnalysis
 
 		public override Int32 GetHashCode()
 		{
-			var hashCode = 966028054;
+			Int32 hashCode = 966028054;
 			hashCode = hashCode * -1521134295 + Source.GetHashCode();
 			hashCode = hashCode * -1521134295 + Identifier.GetHashCode();
 			return hashCode;

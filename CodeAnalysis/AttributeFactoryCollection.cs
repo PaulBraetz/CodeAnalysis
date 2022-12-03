@@ -1,13 +1,12 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 
 namespace RhoMicro.CodeAnalysis.Attributes
 {
 	internal sealed class AttributeFactoryCollection<T> : IAttributeFactory<T>
 	{
-		private readonly List<IAttributeFactory<T>> _factories = new List<IAttributeFactory<T>>();
+		private readonly List<IAttributeFactory<T>> _factories = new();
 
 		public AttributeFactoryCollection<T> Add(IAttributeFactory<T> factory)
 		{
@@ -15,11 +14,11 @@ namespace RhoMicro.CodeAnalysis.Attributes
 			return this;
 		}
 
-		public Boolean TryBuild(AttributeSyntax attributeData, SemanticModel semanticModel, out T attribute)
+		public System.Boolean TryBuild(AttributeSyntax attributeData, SemanticModel semanticModel, out T attribute)
 		{
-			foreach (var factory in _factories)
+			foreach (IAttributeFactory<T> factory in _factories)
 			{
-				if (factory.TryBuild(attributeData, semanticModel, out var builtAttribute))
+				if (factory.TryBuild(attributeData, semanticModel, out T builtAttribute))
 				{
 					attribute = builtAttribute;
 					return true;

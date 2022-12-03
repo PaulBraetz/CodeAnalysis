@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace RhoMicro.CodeAnalysis
 {
 	internal sealed class IdentifierPartEqualityComparer : IEqualityComparer<IIdentifierPart>
 	{
-		public static readonly IdentifierPartEqualityComparer Instance = new IdentifierPartEqualityComparer();
-		public Boolean Equals(IIdentifierPart x, IIdentifierPart y)
+		public static readonly IdentifierPartEqualityComparer Instance = new();
+		public System.Boolean Equals(IIdentifierPart x, IIdentifierPart y)
 		{
-			var result = x == y ||
+			System.Boolean result = x == y ||
 						 x != null &&
 						 y != null &&
 						 x.Value == y.Value;
@@ -16,11 +15,11 @@ namespace RhoMicro.CodeAnalysis
 			return result;
 		}
 
-		public Int32 GetHashCode(IIdentifierPart obj)
+		public System.Int32 GetHashCode(IIdentifierPart obj)
 		{
-			var hashcode = obj == null
+			System.Int32 hashcode = obj == null
 				? 0
-				: -1937169414 + EqualityComparer<String>.Default.GetHashCode(obj.Value);
+				: -1937169414 + EqualityComparer<System.String>.Default.GetHashCode(obj.Value);
 
 			return hashcode;
 		}

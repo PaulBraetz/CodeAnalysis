@@ -12,59 +12,59 @@ namespace RhoMicro.CodeAnalysis.Attributes
 	{
 		public static IAttributeFactory<T> Create()
 		{
-			var collection = new AttributeFactoryCollection<T>();
+			AttributeFactoryCollection<T> collection = new();
 
-			var type = typeof(T);
-			var properties = type.GetProperties().Where(p => p.CanWrite).ToArray();
-			var constructors = type.GetConstructors().Where(c => !c.IsStatic).ToArray();
+			Type type = typeof(T);
+			PropertyInfo[] properties = type.GetProperties().Where(p => p.CanWrite).ToArray();
+			ConstructorInfo[] constructors = type.GetConstructors().Where(c => !c.IsStatic).ToArray();
 
-			for (var ctorIndex = 0; ctorIndex < constructors.Length; ctorIndex++)
+			for (Int32 ctorIndex = 0; ctorIndex < constructors.Length; ctorIndex++)
 			{
-				var constructor = constructors[ctorIndex];
+				ConstructorInfo constructor = constructors[ctorIndex];
 
 				var parameters = new ParameterExpression[2]
 				{
 							Expression.Parameter(typeof(AttributeSyntax), "attributeData"),
 							Expression.Parameter(typeof(SemanticModel), "semanticModel"),
 				};
-				var canBuildStrategy = getCanBuildStrategy();
-				var buildStrategy = getBuildStrategy();
-				var factory = Create(canBuildStrategy, buildStrategy);
+				Func<AttributeSyntax, SemanticModel, Boolean> canBuildStrategy = getCanBuildStrategy();
+				Func<AttributeSyntax, SemanticModel, T> buildStrategy = getBuildStrategy();
+				IAttributeFactory<T> factory = Create(canBuildStrategy, buildStrategy);
 
 				_ = collection.Add(factory);
 
 				Func<AttributeSyntax, SemanticModel, T> getBuildStrategy()
 				{
-					var canBuildTest = getCanBuildTest();
-					var ifTrue = getBuildExpr();
-					var ifFalse = getThrowExpr($"Cannot build {typeof(T)} using the attribute syntax and semantic model provided.");
-					var body = Expression.Condition(canBuildTest, ifTrue, ifFalse);
+					Expression canBuildTest = getCanBuildTest();
+					Expression ifTrue = getBuildExpr();
+					Expression ifFalse = getThrowExpr($"Cannot build {typeof(T)} using the attribute syntax and semantic model provided.");
+					ConditionalExpression body = Expression.Condition(canBuildTest, ifTrue, ifFalse);
 
-					var lambda = Expression.Lambda(body, parameters);
+					LambdaExpression lambda = Expression.Lambda(body, parameters);
 					var strategy = (Func<AttributeSyntax, SemanticModel, T>)lambda.Compile();
 
 					return strategy;
 
 					Expression getBuildExpr()
 					{
-						var ctorParams = constructor.GetParameters().ToArray();
+						ParameterInfo[] ctorParams = constructor.GetParameters().ToArray();
 
-						var newInstanceExpr = Expression.Variable(type, "instance");
+						ParameterExpression newInstanceExpr = Expression.Variable(type, "instance");
 
-						var blockVariables = new List<ParameterExpression>();
-						var blockExpressions = new List<Expression>();
-						var typeParamSetExpressions = new List<Expression>();
-						var typeParamVariables = new List<ParameterExpression>();
+						List<ParameterExpression> blockVariables = new();
+						List<Expression> blockExpressions = new();
+						List<Expression> typeParamSetExpressions = new();
+						List<ParameterExpression> typeParamVariables = new();
 
-						var implementsTypeParameterSetter = type.TryGetMethodSemantically(typeof(IHasTypeParameter).GetMethod(nameof(IHasTypeParameter.SetTypeParameter)), out var typeParameterSetter);
+						Boolean implementsTypeParameterSetter = type.TryGetMethodSemantically(typeof(IHasTypeParameter).GetMethod(nameof(IHasTypeParameter.SetTypeParameter)), out MethodInfo typeParameterSetter);
 
-						for (var i = 0; i < ctorParams.Length; i++)
+						for (Int32 i = 0; i < ctorParams.Length; i++)
 						{
-							var parameter = ctorParams[i];
+							ParameterInfo parameter = ctorParams[i];
 
-							var outValueType = parameter.ParameterType;
-							var tryParseMethod = getTryParseMethod(outValueType);
-							var outValue = Expression.Parameter(outValueType, $"argumentValue_{parameter.Name}");
+							Type outValueType = parameter.ParameterType;
+							MethodInfo tryParseMethod = getTryParseMethod(outValueType);
+							ParameterExpression outValue = Expression.Parameter(outValueType, $"argumentValue_{parameter.Name}");
 
 							blockVariables.Add(outValue);
 
@@ -72,7 +72,7 @@ namespace RhoMicro.CodeAnalysis.Attributes
 
 							if (!(parameter.ParameterType == typeof(Type) && implementsTypeParameterSetter))
 							{
-								var callExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(i), Expression.Convert(Expression.Constant(null), typeof(String)), Expression.Constant(parameter.Name));
+								MethodCallExpression callExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(i), Expression.Convert(Expression.Constant(null), typeof(String)), Expression.Constant(parameter.Name));
 
 								Expression noArgReactionExpr = null;
 								if (parameter.HasDefaultValue)
@@ -93,9 +93,9 @@ namespace RhoMicro.CodeAnalysis.Attributes
 								outValueType = typeof(Object);
 								tryParseMethod = getTryParseMethod(outValueType);
 								outValue = Expression.Parameter(outValueType, $"typeArgumentValue_{parameter.Name}");
-								var callExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(i), Expression.Convert(Expression.Constant(null), typeof(String)), Expression.Constant(parameter.Name));
-								var typeParamSetExpr = Expression.Call(newInstanceExpr, typeParameterSetter, Expression.Constant(parameter.Name), outValue);
-								var conditionalSetExpr = Expression.IfThen(callExpr, typeParamSetExpr);
+								MethodCallExpression callExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(i), Expression.Convert(Expression.Constant(null), typeof(String)), Expression.Constant(parameter.Name));
+								MethodCallExpression typeParamSetExpr = Expression.Call(newInstanceExpr, typeParameterSetter, Expression.Constant(parameter.Name), outValue);
+								ConditionalExpression conditionalSetExpr = Expression.IfThen(callExpr, typeParamSetExpr);
 
 								typeParamVariables.Add(outValue);
 								typeParamSetExpressions.Add(conditionalSetExpr);
@@ -104,21 +104,21 @@ namespace RhoMicro.CodeAnalysis.Attributes
 							blockExpressions.Add(paramAssignmentExpr);
 						}
 
-						var newExpr = Expression.New(constructor, blockVariables);
-						var newInstanceAssignmentExpr = Expression.Assign(newInstanceExpr, newExpr);
+						NewExpression newExpr = Expression.New(constructor, blockVariables);
+						BinaryExpression newInstanceAssignmentExpr = Expression.Assign(newInstanceExpr, newExpr);
 
 						blockVariables.AddRange(typeParamVariables);
 						blockVariables.Add(newInstanceExpr);
 						blockExpressions.Add(newInstanceAssignmentExpr);
 						blockExpressions.AddRange(typeParamSetExpressions);
 
-						var implementsTypePropertySetter = type.TryGetMethodSemantically(typeof(IHasTypeProperty).GetMethod(nameof(IHasTypeProperty.SetTypeProperty)), out var typePropertySetter);
+						Boolean implementsTypePropertySetter = type.TryGetMethodSemantically(typeof(IHasTypeProperty).GetMethod(nameof(IHasTypeProperty.SetTypeProperty)), out MethodInfo typePropertySetter);
 
-						for (var i = 0; i < properties.Length; i++)
+						for (Int32 i = 0; i < properties.Length; i++)
 						{
-							var property = properties[i];
+							PropertyInfo property = properties[i];
 
-							var outValueType = property.PropertyType;
+							Type outValueType = property.PropertyType;
 							ParameterExpression outValue;
 							Expression setConditionExpr;
 							Expression setExpr;
@@ -127,20 +127,20 @@ namespace RhoMicro.CodeAnalysis.Attributes
 								setExpr = Expression.Call(newInstanceExpr, property.SetMethod, Expression.Convert(Expression.Constant(null), outValueType));
 
 								outValueType = typeof(Object);
-								var tryParseMethod = getTryParseMethod(outValueType);
+								MethodInfo tryParseMethod = getTryParseMethod(outValueType);
 								outValue = Expression.Parameter(outValueType, $"typePropertyValue_{property.Name}");
-								var helperCallExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(-1), Expression.Constant(property.Name), Expression.Convert(Expression.Constant(null), typeof(String)));
-								var helperSetExpr = Expression.Call(newInstanceExpr, typePropertySetter, Expression.Constant(property.Name), outValue);
+								MethodCallExpression helperCallExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(-1), Expression.Constant(property.Name), Expression.Convert(Expression.Constant(null), typeof(String)));
+								MethodCallExpression helperSetExpr = Expression.Call(newInstanceExpr, typePropertySetter, Expression.Constant(property.Name), outValue);
 
-								var conditionalBlock = Expression.Block(setExpr,helperSetExpr);
+								BlockExpression conditionalBlock = Expression.Block(setExpr, helperSetExpr);
 
 								setConditionExpr = Expression.IfThen(helperCallExpr, conditionalBlock);
 							}
 							else
 							{
-								var tryParseMethod = getTryParseMethod(outValueType);
+								MethodInfo tryParseMethod = getTryParseMethod(outValueType);
 								outValue = Expression.Parameter(outValueType, $"propertyValue_{property.Name}");
-								var callExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(-1), Expression.Constant(property.Name), Expression.Convert(Expression.Constant(null), typeof(String)));
+								MethodCallExpression callExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(-1), Expression.Constant(property.Name), Expression.Convert(Expression.Constant(null), typeof(String)));
 								setExpr = Expression.Call(newInstanceExpr, property.SetMethod, outValue);
 								setConditionExpr = Expression.IfThen(callExpr, setExpr);
 							}
@@ -151,23 +151,23 @@ namespace RhoMicro.CodeAnalysis.Attributes
 
 						blockExpressions.Add(newInstanceExpr);
 
-						var block = Expression.Block(blockVariables, blockExpressions);
+						BlockExpression block = Expression.Block(blockVariables, blockExpressions);
 
 						return block;
 
 						MethodInfo getTryParseMethod(Type forType)
 						{
-							var name = forType.IsArray ?
+							String name = forType.IsArray ?
 								nameof(Extensions.TryParseArrayArgument) :
 								nameof(Extensions.TryParseArgument);
-							var constraint = forType.IsArray ? forType.GetElementType() : forType;
+							Type constraint = forType.IsArray ? forType.GetElementType() : forType;
 
-							var method = typeof(Extensions).GetMethods()
+							MethodInfo method = typeof(Extensions).GetMethods()
 								.Where(m => m.IsGenericMethod)
 								.Select(m => m.MakeGenericMethod(constraint))
 								.Single(m =>
 								{
-									var methodParams = m.GetParameters();
+									ParameterInfo[] methodParams = m.GetParameters();
 									return m.Name == name &&
 										methodParams.Length == 6 &&
 										methodParams[0].ParameterType == typeof(AttributeSyntax) &&
@@ -184,11 +184,11 @@ namespace RhoMicro.CodeAnalysis.Attributes
 
 					Expression getThrowExpr(String message)
 					{
-						var ctorInfo = typeof(InvalidOperationException).GetConstructor(new[] { typeof(String) });
-						var ctorParam = Expression.Constant(message);
-						var throwExpr = Expression.Throw(Expression.New(ctorInfo, ctorParam));
-						var returnExpr = Expression.Convert(Expression.Constant(null), type);
-						var throwBlock = Expression.Block(throwExpr, returnExpr);
+						ConstructorInfo ctorInfo = typeof(InvalidOperationException).GetConstructor(new[] { typeof(String) });
+						ConstantExpression ctorParam = Expression.Constant(message);
+						UnaryExpression throwExpr = Expression.Throw(Expression.New(ctorInfo, ctorParam));
+						UnaryExpression returnExpr = Expression.Convert(Expression.Constant(null), type);
+						BlockExpression throwBlock = Expression.Block(throwExpr, returnExpr);
 
 						return throwBlock;
 					}
@@ -196,9 +196,9 @@ namespace RhoMicro.CodeAnalysis.Attributes
 
 				Func<AttributeSyntax, SemanticModel, Boolean> getCanBuildStrategy()
 				{
-					var body = getCanBuildTest();
+					Expression body = getCanBuildTest();
 
-					var lambda = Expression.Lambda(body, parameters);
+					LambdaExpression lambda = Expression.Lambda(body, parameters);
 					var strategy = (Func<AttributeSyntax, SemanticModel, Boolean>)lambda.Compile();
 
 					return strategy;
@@ -206,44 +206,44 @@ namespace RhoMicro.CodeAnalysis.Attributes
 
 				Expression getCanBuildTest()
 				{
-					var typeExpr = Expression.Constant(type, typeof(Type));
-					var getCtorsMethod = typeof(Type).GetMethod(nameof(Type.GetConstructors), new Type[] { });
-					var getCtorsCallExpr = Expression.Call(typeExpr, getCtorsMethod);
+					ConstantExpression typeExpr = Expression.Constant(type, typeof(Type));
+					MethodInfo getCtorsMethod = typeof(Type).GetMethod(nameof(Type.GetConstructors), new Type[] { });
+					MethodCallExpression getCtorsCallExpr = Expression.Call(typeExpr, getCtorsMethod);
 
-					var whereMethod = typeof(Enumerable).GetMethods()
+					MethodInfo whereMethod = typeof(Enumerable).GetMethods()
 						.Where(m => m.Name == nameof(Enumerable.Where))
 						.Select(m => m.MakeGenericMethod(typeof(ConstructorInfo)))
 						.Single(m =>
 						{
-							var methodParameters = m.GetParameters();
-							var match = methodParameters.Length == 2 &&
+							ParameterInfo[] methodParameters = m.GetParameters();
+							Boolean match = methodParameters.Length == 2 &&
 										methodParameters[0].ParameterType == typeof(IEnumerable<ConstructorInfo>) &&
 										methodParameters[1].ParameterType == typeof(Func<ConstructorInfo, Boolean>);
 
 							return match;
 						});
-					var predicateParamExpr = Expression.Parameter(typeof(ConstructorInfo), "c");
-					var isStaticMethod = typeof(ConstructorInfo).GetProperty(nameof(ConstructorInfo.IsStatic)).GetMethod;
-					var predicateExpr = Expression.Lambda(Expression.Not(Expression.Call(predicateParamExpr, isStaticMethod)), predicateParamExpr);
-					var whereCallExpr = Expression.Call(null, whereMethod, getCtorsCallExpr, predicateExpr);
+					ParameterExpression predicateParamExpr = Expression.Parameter(typeof(ConstructorInfo), "c");
+					MethodInfo isStaticMethod = typeof(ConstructorInfo).GetProperty(nameof(ConstructorInfo.IsStatic)).GetMethod;
+					LambdaExpression predicateExpr = Expression.Lambda(Expression.Not(Expression.Call(predicateParamExpr, isStaticMethod)), predicateParamExpr);
+					MethodCallExpression whereCallExpr = Expression.Call(null, whereMethod, getCtorsCallExpr, predicateExpr);
 
-					var toArrayMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.ToArray)).MakeGenericMethod(typeof(ConstructorInfo));
-					var toArrayCall = Expression.Call(null, toArrayMethod, whereCallExpr);
+					MethodInfo toArrayMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.ToArray)).MakeGenericMethod(typeof(ConstructorInfo));
+					MethodCallExpression toArrayCall = Expression.Call(null, toArrayMethod, whereCallExpr);
 
-					var ctorIndexExpr = Expression.Constant(ctorIndex);
-					var indexAccessExpr = Expression.ArrayIndex(toArrayCall, ctorIndexExpr);
+					ConstantExpression ctorIndexExpr = Expression.Constant(ctorIndex);
+					BinaryExpression indexAccessExpr = Expression.ArrayIndex(toArrayCall, ctorIndexExpr);
 
-					var matchesMethod = typeof(Extensions).GetMethods()
+					MethodInfo matchesMethod = typeof(Extensions).GetMethods()
 						.Single(m =>
 						{
-							var methodParams = m.GetParameters();
+							ParameterInfo[] methodParams = m.GetParameters();
 							return m.Name == nameof(Extensions.Matches) &&
 								methodParams.Length == 3 &&
 								methodParams[0].ParameterType == typeof(AttributeSyntax) &&
 								methodParams[1].ParameterType == typeof(SemanticModel) &&
 								methodParams[2].ParameterType == typeof(ConstructorInfo);
 						});
-					var matchesCall = Expression.Call(null, matchesMethod, parameters[0], parameters[1], indexAccessExpr);
+					MethodCallExpression matchesCall = Expression.Call(null, matchesMethod, parameters[0], parameters[1], indexAccessExpr);
 
 					return matchesCall;
 				}

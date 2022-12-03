@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace RhoMicro.CodeAnalysis
 {
-	internal readonly struct Namespace : INamespace,IEquatable<INamespace>
+	internal readonly struct Namespace : INamespace, IEquatable<INamespace>
 	{
 		private Namespace(ImmutableArray<IIdentifierPart> parts)
 		{
@@ -21,12 +21,12 @@ namespace RhoMicro.CodeAnalysis
 		}
 		public static Namespace Create(Type type)
 		{
-			var namespaceParts = type.Namespace.Split('.');
+			String[] namespaceParts = type.Namespace.Split('.');
 			return Create().AppendRange(namespaceParts);
 		}
 		public static Namespace Create(ISymbol symbol)
 		{
-			var result = Create();
+			Namespace result = Create();
 
 			while (symbol != null && symbol.Name != String.Empty)
 			{
@@ -52,7 +52,7 @@ namespace RhoMicro.CodeAnalysis
 				return this;
 			}
 
-			var parts = GetNextParts().Add(IdentifierPart.Name(name));
+			ImmutableArray<IIdentifierPart> parts = GetNextParts().Add(IdentifierPart.Name(name));
 
 			return new Namespace(parts);
 		}
@@ -63,14 +63,14 @@ namespace RhoMicro.CodeAnalysis
 				return this;
 			}
 
-			var parts = GetPreviousParts().Insert(0, IdentifierPart.Name(name));
+			ImmutableArray<IIdentifierPart> parts = GetPreviousParts().Insert(0, IdentifierPart.Name(name));
 
 			return new Namespace(parts);
 		}
 		public Namespace PrependRange(IEnumerable<String> names)
 		{
-			var @namespace = this;
-			foreach (var name in names)
+			Namespace @namespace = this;
+			foreach (String name in names)
 			{
 				@namespace = @namespace.Prepend(name);
 			}
@@ -79,8 +79,8 @@ namespace RhoMicro.CodeAnalysis
 		}
 		public Namespace AppendRange(IEnumerable<String> names)
 		{
-			var @namespace = this;
-			foreach (var name in names)
+			Namespace @namespace = this;
+			foreach (String name in names)
 			{
 				@namespace = @namespace.Append(name);
 			}
@@ -90,9 +90,9 @@ namespace RhoMicro.CodeAnalysis
 
 		private ImmutableArray<IIdentifierPart> GetNextParts()
 		{
-			var lastKind = Parts.LastOrDefault()?.Kind ?? IdentifierParts.Kind.None;
+			IdentifierParts.Kind lastKind = Parts.LastOrDefault()?.Kind ?? IdentifierParts.Kind.None;
 
-			var prependSeparator = lastKind == IdentifierParts.Kind.Name;
+			Boolean prependSeparator = lastKind == IdentifierParts.Kind.Name;
 
 			return prependSeparator ?
 				Parts.Add(IdentifierPart.Period()) :
@@ -100,9 +100,9 @@ namespace RhoMicro.CodeAnalysis
 		}
 		private ImmutableArray<IIdentifierPart> GetPreviousParts()
 		{
-			var firstKind = Parts.FirstOrDefault()?.Kind ?? IdentifierParts.Kind.None;
+			IdentifierParts.Kind firstKind = Parts.FirstOrDefault()?.Kind ?? IdentifierParts.Kind.None;
 
-			var appendSeparator = firstKind == IdentifierParts.Kind.Name;
+			Boolean appendSeparator = firstKind == IdentifierParts.Kind.Name;
 
 			return appendSeparator ?
 				Parts.Insert(0, IdentifierPart.Period()) :

@@ -24,15 +24,15 @@ namespace RhoMicro.CodeAnalysis
 		}
 		public static TypeIdentifierName Create(ITypeSymbol symbol)
 		{
-			var result = Create();
+			TypeIdentifierName result = Create();
 
 			if (symbol.ContainingType != null)
 			{
-				var containingType = Create(symbol.ContainingType);
+				TypeIdentifierName containingType = Create(symbol.ContainingType);
 				result = result.AppendTypePart(containingType);
 			}
 
-			var flag = false;
+			Boolean flag = false;
 			if (symbol is IArrayTypeSymbol arraySymbol)
 			{
 				flag = true;
@@ -45,9 +45,9 @@ namespace RhoMicro.CodeAnalysis
 			{
 				var arguments = new ITypeIdentifier[namedSymbol.TypeArguments.Length];
 
-				for (var i = 0; i < arguments.Length; i++)
+				for (Int32 i = 0; i < arguments.Length; i++)
 				{
-					var typeArgument = namedSymbol.TypeArguments[i];
+					ITypeSymbol typeArgument = namedSymbol.TypeArguments[i];
 					TypeIdentifier argument;
 					if (SymbolEqualityComparer.Default.Equals(typeArgument.ContainingType, namedSymbol))
 					{
@@ -78,28 +78,28 @@ namespace RhoMicro.CodeAnalysis
 
 		public TypeIdentifierName AppendTypePart(ITypeIdentifierName type)
 		{
-			var parts = GetNextParts(IdentifierParts.Kind.Name)
+			ImmutableArray<IIdentifierPart> parts = GetNextParts(IdentifierParts.Kind.Name)
 				.AddRange(type.Parts);
 
 			return new TypeIdentifierName(parts);
 		}
 		public TypeIdentifierName AppendNamePart(String name)
 		{
-			var parts = GetNextParts(IdentifierParts.Kind.Name)
+			ImmutableArray<IIdentifierPart> parts = GetNextParts(IdentifierParts.Kind.Name)
 				.Add(IdentifierPart.Name(name));
 
 			return new TypeIdentifierName(parts);
 		}
 		public TypeIdentifierName AppendGenericPart(ITypeIdentifier[] arguments)
 		{
-			var parts = GetNextParts(IdentifierParts.Kind.GenericOpen)
+			ImmutableArray<IIdentifierPart> parts = GetNextParts(IdentifierParts.Kind.GenericOpen)
 				.Add(IdentifierPart.GenericOpen());
 
-			var typesArray = arguments ?? Array.Empty<ITypeIdentifier>();
+			ITypeIdentifier[] typesArray = arguments ?? Array.Empty<ITypeIdentifier>();
 
-			for (var i = 0; i < typesArray.Length; i++)
+			for (Int32 i = 0; i < typesArray.Length; i++)
 			{
-				var type = typesArray[i];
+				ITypeIdentifier type = typesArray[i];
 
 				if (type.Namespace.Parts.Any())
 				{
@@ -121,15 +121,15 @@ namespace RhoMicro.CodeAnalysis
 		}
 		public TypeIdentifierName AppendArrayPart()
 		{
-			var parts = GetNextParts(IdentifierParts.Kind.Array).Add(IdentifierPart.Array());
+			ImmutableArray<IIdentifierPart> parts = GetNextParts(IdentifierParts.Kind.Array).Add(IdentifierPart.Array());
 			return new TypeIdentifierName(parts);
 		}
 
 		private ImmutableArray<IIdentifierPart> GetNextParts(IdentifierParts.Kind nextKind)
 		{
-			var lastKind = Parts.LastOrDefault()?.Kind ?? IdentifierParts.Kind.None;
+			IdentifierParts.Kind lastKind = Parts.LastOrDefault()?.Kind ?? IdentifierParts.Kind.None;
 
-			var prependSeparator = nextKind == IdentifierParts.Kind.Name &&
+			Boolean prependSeparator = nextKind == IdentifierParts.Kind.Name &&
 									(lastKind == IdentifierParts.Kind.GenericOpen ||
 									lastKind == IdentifierParts.Kind.Name);
 

@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Xml.Linq;
 
 namespace RhoMicro.CodeAnalysis
 {
 	internal sealed class TypeIdentifierEqualityComparer : IEqualityComparer<ITypeIdentifier>
 	{
-		public static readonly TypeIdentifierEqualityComparer Instance = new TypeIdentifierEqualityComparer();
+		public static readonly TypeIdentifierEqualityComparer Instance = new();
 		public Boolean Equals(ITypeIdentifier x, ITypeIdentifier y)
 		{
-			var result = x == y ||
+			Boolean result = x == y ||
 						 x != null &&
 						 y != null &&
 						 NamespaceEqualityComparer.Instance.Equals(x.Namespace, y.Namespace) &&
@@ -26,7 +24,7 @@ namespace RhoMicro.CodeAnalysis
 				throw new ArgumentNullException(nameof(obj));
 			}
 
-			var hashCode = -179327946;
+			Int32 hashCode = -179327946;
 			hashCode = hashCode * -1521134295 + TypeIdentifierNameEqualityComparer.Instance.GetHashCode(obj.Name);
 			hashCode = hashCode * -1521134295 + NamespaceEqualityComparer.Instance.GetHashCode(obj.Namespace);
 			return hashCode;

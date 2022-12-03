@@ -13,7 +13,7 @@ namespace RhoMicro.CodeAnalysis.Attributes
 		}
 
 		private readonly Func<AttributeSyntax, SemanticModel, T> _buildStrategy;
-		private readonly Func<AttributeSyntax, SemanticModel, bool> _canBuildStrategy;
+		private readonly Func<AttributeSyntax, SemanticModel, Boolean> _canBuildStrategy;
 
 		protected override Boolean CanBuild(AttributeSyntax attributeData, SemanticModel semanticModel)
 		{

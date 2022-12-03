@@ -4,10 +4,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RhoMicro.CodeAnalysis;
 using RhoMicro.CodeAnalysis.Attributes;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata;
 
 namespace TestApp
 {
@@ -43,7 +41,7 @@ namespace TestApp
 		private readonly IDictionary<string, object> _typeProperties = new Dictionary<string, object>();
 		public void SetTypeProperty(string propertyName, object type)
 		{
-			var parameterName = _propertyParameterMap[propertyName];
+			string parameterName = _propertyParameterMap[propertyName];
 			if (_typeProperties.ContainsKey(parameterName))
 			{
 				_typeProperties[parameterName] = type;
@@ -55,18 +53,18 @@ namespace TestApp
 		}
 		public object GetTypeProperty(string propertyName)
 		{
-			var parameterName = _propertyParameterMap[propertyName];
-			return _typeProperties.TryGetValue(parameterName, out var value) ? value : null;
+			string parameterName = _propertyParameterMap[propertyName];
+			return _typeProperties.TryGetValue(parameterName, out object value) ? value : null;
 		}
 
-		public void SetTypeParameter(String parameterName, Object type)
+		public void SetTypeParameter(string parameterName, object type)
 		{
 			_typeProperties.Add(parameterName, type);
 		}
 
-		public Object GetTypeParameter(String parameterName)
+		public object GetTypeParameter(string parameterName)
 		{
-			return _typeProperties.TryGetValue(parameterName, out var value) ? value : null;
+			return _typeProperties.TryGetValue(parameterName, out object value) ? value : null;
 		}
 	}
 
@@ -135,7 +133,7 @@ namespace TestApp
 	}
 }";
 
-		private const String TestClass_SOURCE =
+		private const string TestClass_SOURCE =
 @"
 using TestApp;
 
@@ -157,25 +155,25 @@ namespace TestNamespace
 
 		static void Main(string[] args)
 		{
-			var compilation = CSharpCompilation.Create("TestAssembly")
+			CSharpCompilation compilation = CSharpCompilation.Create("TestAssembly")
 				.AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location))
 				.AddSyntaxTrees(
 					CSharpSyntaxTree.ParseText(TestClass_SOURCE),
 					CSharpSyntaxTree.ParseText(AnalysisUnit.GeneratedType.Source.Text));
 
-			var type = compilation.SyntaxTrees.Select(t => t.GetRoot())
+			BaseTypeDeclarationSyntax type = compilation.SyntaxTrees.Select(t => t.GetRoot())
 				.SelectMany(t => t.DescendantNodes(n => !(n is BaseTypeDeclarationSyntax)))
 				.OfType<BaseTypeDeclarationSyntax>()
 				.ToArray()[0];
 
-			var semanticModel = compilation.GetSemanticModel(type.SyntaxTree);
+			SemanticModel semanticModel = compilation.GetSemanticModel(type.SyntaxTree);
 
-			var attribute = type.AttributeLists.SelectMany(al => al.Attributes).OfAttributeClasses(semanticModel, AnalysisUnit.GeneratedType.Identifier).Single();
+			AttributeSyntax attribute = type.AttributeLists.SelectMany(al => al.Attributes).OfAttributeClasses(semanticModel, AnalysisUnit.GeneratedType.Identifier).Single();
 
-			AnalysisUnit.Factory.TryBuild(attribute, semanticModel, out TestAttribute attributeInstance);
+			_ = AnalysisUnit.Factory.TryBuild(attribute, semanticModel, out TestAttribute attributeInstance);
 
-			Console.WriteLine(attributeInstance?.GetTypeProperty(nameof(TestAttribute.TypeProperty))??"null");
-			Console.WriteLine((Object)attributeInstance?.TypeProperty ?? "null");
+			Console.WriteLine(attributeInstance?.GetTypeProperty(nameof(TestAttribute.TypeProperty)) ?? "null");
+			Console.WriteLine((object)attributeInstance?.TypeProperty ?? "null");
 		}
 	}
 }

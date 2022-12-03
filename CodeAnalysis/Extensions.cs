@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace RhoMicro.CodeAnalysis
 {
@@ -13,17 +12,17 @@ namespace RhoMicro.CodeAnalysis
 	{
 		public static String ToNonGenericString(this TypeIdentifier identifier)
 		{
-			var result = String.Concat(identifier.Namespace.Parts.Append(IdentifierPart.Period()).Concat(identifier.Name.Parts.TakeWhile(p => p.Kind == IdentifierParts.Kind.Name || p.Kind == IdentifierParts.Kind.Period)));
+			String result = String.Concat(identifier.Namespace.Parts.Append(IdentifierPart.Period()).Concat(identifier.Name.Parts.TakeWhile(p => p.Kind == IdentifierParts.Kind.Name || p.Kind == IdentifierParts.Kind.Period)));
 
 			return result;
 		}
 
 		public static IEnumerable<IEnumerable<T>> Subsets<T>(this IEnumerable<T> collection)
 		{
-			var arr = collection.ToArray();
-			var subsetCount = Math.Pow(2, arr.Length);
+			T[] arr = collection.ToArray();
+			Double subsetCount = Math.Pow(2, arr.Length);
 
-			for (var i = 0; i < subsetCount; i++)
+			for (Int32 i = 0; i < subsetCount; i++)
 			{
 				yield return collection.Where((element, position) => ((1 << position) & i) == 0);
 			}
@@ -39,14 +38,14 @@ namespace RhoMicro.CodeAnalysis
 		}
 		public static void AddSources(this GeneratorPostInitializationContext context, IEnumerable<GeneratedSource> sources)
 		{
-			foreach (var source in sources)
+			foreach (GeneratedSource source in sources)
 			{
 				context.AddSource(source);
 			}
 		}
 		public static void AddSources(this GeneratorPostInitializationContext context, params GeneratedSource[] sources)
 		{
-			foreach (var source in sources)
+			foreach (GeneratedSource source in sources)
 			{
 				context.AddSource(source);
 			}
@@ -58,14 +57,14 @@ namespace RhoMicro.CodeAnalysis
 		}
 		public static void AddSources(this GeneratorExecutionContext context, IEnumerable<GeneratedSource> sources)
 		{
-			foreach (var source in sources)
+			foreach (GeneratedSource source in sources)
 			{
 				context.AddSource(source);
 			}
 		}
 		public static void AddSources(this GeneratorExecutionContext context, params GeneratedSource[] sources)
 		{
-			foreach (var source in sources)
+			foreach (GeneratedSource source in sources)
 			{
 				context.AddSource(source);
 			}
@@ -78,20 +77,20 @@ namespace RhoMicro.CodeAnalysis
 
 		public static TypeSyntax AsSyntax(this TypeIdentifier typeIdentifier)
 		{
-			var syntax = SyntaxFactory.ParseTypeName(typeIdentifier);
+			TypeSyntax syntax = SyntaxFactory.ParseTypeName(typeIdentifier);
 
 			return syntax;
 		}
 		public static TypeSyntax AsSyntax(this Type type)
 		{
-			var syntax = TypeIdentifier.Create(type).AsSyntax();
+			TypeSyntax syntax = TypeIdentifier.Create(type).AsSyntax();
 
 			return syntax;
 		}
 
 		public static ITypeIdentifier GetIdentifier(this Type type)
 		{
-			var identifier = type != null ?
+			ITypeIdentifier identifier = type != null ?
 				(ITypeIdentifier)TypeIdentifier.Create(type) :
 				throw new ArgumentNullException(nameof(type));
 
@@ -101,34 +100,34 @@ namespace RhoMicro.CodeAnalysis
 		#region AttributeSyntax Operations
 		public static Boolean Matches(this AttributeSyntax attribute, SemanticModel semanticModel, ConstructorInfo constructor)
 		{
-			var arguments = (IEnumerable<AttributeArgumentSyntax>)attribute.ArgumentList?.Arguments ?? Array.Empty<AttributeArgumentSyntax>();
+			IEnumerable<AttributeArgumentSyntax> arguments = (IEnumerable<AttributeArgumentSyntax>)attribute.ArgumentList?.Arguments ?? Array.Empty<AttributeArgumentSyntax>();
 
-			var match = matchesType() && matchesParameters() && matchesProperties();
+			Boolean match = matchesType() && matchesParameters() && matchesProperties();
 
 			return match;
 
 			Boolean matchesType()
 			{
-				var typeMatch = attribute.IsType(semanticModel, TypeIdentifier.Create(constructor.DeclaringType));
+				Boolean typeMatch = attribute.IsType(semanticModel, TypeIdentifier.Create(constructor.DeclaringType));
 
 				return typeMatch;
 			}
 
 			Boolean matchesParameters()
 			{
-				var unmatchedArguments = arguments.Where(a => a.NameEquals == null).ToArray();
+				AttributeArgumentSyntax[] unmatchedArguments = arguments.Where(a => a.NameEquals == null).ToArray();
 
-				var position = 0;
+				Int32 position = 0;
 				var positionalParameters = constructor.GetParameters().ToDictionary(p => position++, p => p);
 				var namedParameters = constructor.GetParameters().ToDictionary(p => p.Name, p => p);
 
 				for (position = 0; position < unmatchedArguments.Length; position++)
 				{
-					var unmatchedArgument = unmatchedArguments[position];
+					AttributeArgumentSyntax unmatchedArgument = unmatchedArguments[position];
 
 					if (unmatchedArgument.NameColon == null)
 					{
-						if (!positionalParameters.TryGetValue(position, out var positionalParameter))
+						if (!positionalParameters.TryGetValue(position, out ParameterInfo positionalParameter))
 						{
 							return false;
 						}
@@ -138,8 +137,8 @@ namespace RhoMicro.CodeAnalysis
 					}
 					else
 					{
-						var argumentName = unmatchedArgument.NameColon.Name.Identifier.ToString();
-						if (!namedParameters.TryGetValue(argumentName, out var namedParameter))
+						String argumentName = unmatchedArgument.NameColon.Name.Identifier.ToString();
+						if (!namedParameters.TryGetValue(argumentName, out ParameterInfo namedParameter))
 						{
 							return false;
 						}
@@ -155,7 +154,7 @@ namespace RhoMicro.CodeAnalysis
 					}
 				}
 
-				var noneLeft = !positionalParameters.Any(kvp => !kvp.Value.IsOptional);
+				Boolean noneLeft = !positionalParameters.Any(kvp => !kvp.Value.IsOptional);
 
 				return noneLeft;
 			}
@@ -166,7 +165,7 @@ namespace RhoMicro.CodeAnalysis
 					.Where(p => p.CanWrite)
 					.ToDictionary(p => p.Name, p => p);
 
-				var allValid = arguments.Where(a => a.NameEquals != null)
+				Boolean allValid = arguments.Where(a => a.NameEquals != null)
 					.All(a =>
 						properties.ContainsKey(a.NameEquals.Name.Identifier.ToString()) &&
 						(!(a.Expression is TypeOfExpressionSyntax) || constructor.DeclaringType.ImplementsMethodsSemantically<IHasTypeProperty>()));
@@ -185,51 +184,51 @@ namespace RhoMicro.CodeAnalysis
 
 		public static Boolean ImplementsMethodsSemantically<T>(this Type type)
 		{
-			var match = typeof(T).GetMethods().All(rm => type.TryGetMethodSemantically(rm, out var _));
+			Boolean match = typeof(T).GetMethods().All(rm => type.TryGetMethodSemantically(rm, out MethodInfo _));
 
 			return match;
 		}
 
 		public static IEnumerable<AttributeSyntax> OfAttributeClasses(this IEnumerable<AttributeSyntax> attributes, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
 		{
-			var requiredTypes = new HashSet<String>(identifiers.SelectMany(GetVariations));
-			var foundAttributes = attributes.Where(a => requiredTypes.Contains(semanticModel.GetTypeInfo(a).Type?.ToDisplayString()));
+			HashSet<String> requiredTypes = new(identifiers.SelectMany(GetVariations));
+			IEnumerable<AttributeSyntax> foundAttributes = attributes.Where(a => requiredTypes.Contains(semanticModel.GetTypeInfo(a).Type?.ToDisplayString()));
 
 			return foundAttributes;
 		}
 		public static IEnumerable<AttributeSyntax> OfAttributeClasses(this IEnumerable<AttributeListSyntax> attributeLists, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
 		{
-			var requiredTypes = new HashSet<String>(identifiers.SelectMany(GetVariations));
-			var foundAttributes = attributeLists.SelectMany(al => al.Attributes).Where(a => requiredTypes.Contains(semanticModel.GetTypeInfo(a).Type?.ToDisplayString()));
+			HashSet<String> requiredTypes = new(identifiers.SelectMany(GetVariations));
+			IEnumerable<AttributeSyntax> foundAttributes = attributeLists.SelectMany(al => al.Attributes).Where(a => requiredTypes.Contains(semanticModel.GetTypeInfo(a).Type?.ToDisplayString()));
 
 			return foundAttributes;
 		}
 		public static Boolean HasAttributes(this IEnumerable<AttributeListSyntax> attributeLists, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
 		{
-			var match = attributeLists.OfAttributeClasses(semanticModel, identifiers).Any();
+			Boolean match = attributeLists.OfAttributeClasses(semanticModel, identifiers).Any();
 
 			return match;
 		}
 
 		public static Boolean IsType(this AttributeSyntax attribute, SemanticModel semanticModel, TypeIdentifier identifier)
 		{
-			var match = semanticModel.GetTypeInfo(attribute).Type?.ToDisplayString() == identifier.ToString();
+			Boolean match = semanticModel.GetTypeInfo(attribute).Type?.ToDisplayString() == identifier.ToString();
 
 			return match;
 		}
 		public static Boolean TryParseArgument<T>(this AttributeSyntax attribute, SemanticModel semanticModel, out T value, Int32 position = -1, String propertyName = null, String parameterName = null)
 		{
-			var arg = attribute.GetArgument(semanticModel, position, propertyName, parameterName);
+			Optional<Object> arg = attribute.GetArgument(semanticModel, position, propertyName, parameterName);
 
-			var result = TryParse(arg, out value);
+			Boolean result = TryParse(arg, out value);
 
 			return result;
 		}
 		public static Boolean TryParseArrayArgument<T>(this AttributeSyntax attribute, SemanticModel semanticModel, out T[] value, Int32 position = -1, String propertyName = null, String parameterName = null)
 		{
-			var arg = attribute.GetArgument(semanticModel, position, propertyName, parameterName);
+			Optional<Object> arg = attribute.GetArgument(semanticModel, position, propertyName, parameterName);
 
-			var result = TryParseArray(arg, out value);
+			Boolean result = TryParseArray(arg, out value);
 
 			return result;
 		}
@@ -269,12 +268,12 @@ namespace RhoMicro.CodeAnalysis
 				return false;
 			}
 
-			var elements = constant.Value is Object[] objectArray ? objectArray : constant.Value is T ? new object[] { constant.Value } : Array.Empty<Object>();
+			Object[] elements = constant.Value is Object[] objectArray ? objectArray : constant.Value is T ? new Object[] { constant.Value } : Array.Empty<Object>();
 			var tempValues = new T[elements.Length];
 
-			for (var i = 0; i < elements.Length; i++)
+			for (Int32 i = 0; i < elements.Length; i++)
 			{
-				var element = elements[i];
+				Object element = elements[i];
 
 				if (element is T castValue)
 				{
@@ -297,8 +296,8 @@ namespace RhoMicro.CodeAnalysis
 
 		public static Optional<Object> GetArgument(this AttributeSyntax attribute, SemanticModel semanticModel, Int32 position = -1, String propertyName = null, String parameterName = null)
 		{
-			var arguments = (IEnumerable<AttributeArgumentSyntax>)attribute.ArgumentList?.Arguments ?? Array.Empty<AttributeArgumentSyntax>();
-			foreach (var argument in arguments)
+			IEnumerable<AttributeArgumentSyntax> arguments = (IEnumerable<AttributeArgumentSyntax>)attribute.ArgumentList?.Arguments ?? Array.Empty<AttributeArgumentSyntax>();
+			foreach (AttributeArgumentSyntax argument in arguments)
 			{
 				if (argument.NameEquals != null)
 				{
@@ -321,11 +320,11 @@ namespace RhoMicro.CodeAnalysis
 
 				Optional<Object> getConstantValue()
 				{
-					var result = semanticModel.GetConstantValue(argument.Expression);
+					Optional<Object> result = semanticModel.GetConstantValue(argument.Expression);
 
 					if (argument.Expression is ArrayCreationExpressionSyntax arrayCreationExpression)
 					{
-						var elements = arrayCreationExpression.Initializer?
+						Object[] elements = arrayCreationExpression.Initializer?
 							.Expressions
 							.Select(e => semanticModel.GetConstantValue(e))
 							.Where(o => o.HasValue)
@@ -336,7 +335,7 @@ namespace RhoMicro.CodeAnalysis
 					}
 					else if (argument.Expression is ObjectCreationExpressionSyntax objectCreationExpression)
 					{
-						result = new Optional<Object>(new object());
+						result = new Optional<Object>(new Object());
 					}
 					else if (argument.Expression is TypeOfExpressionSyntax typeOfExpression)
 					{
@@ -354,44 +353,44 @@ namespace RhoMicro.CodeAnalysis
 		#region AttributeData Operations
 		public static IEnumerable<AttributeData> OfAttributeClasses(this IEnumerable<AttributeData> attributes, params TypeIdentifier[] identifiers)
 		{
-			var requiredTypes = new HashSet<String>(identifiers.Select(i => i.ToString()));
-			var foundAttributes = attributes.Where(a => requiredTypes.Contains(a.AttributeClass.ToDisplayString()));
+			HashSet<String> requiredTypes = new(identifiers.Select(i => i.ToString()));
+			IEnumerable<AttributeData> foundAttributes = attributes.Where(a => requiredTypes.Contains(a.AttributeClass.ToDisplayString()));
 
 			return foundAttributes;
 		}
 		public static Boolean HasAttributes(this SyntaxNode node, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
 		{
-			var match = semanticModel.GetDeclaredSymbol(node)?.HasAttributes(identifiers)
+			Boolean match = semanticModel.GetDeclaredSymbol(node)?.HasAttributes(identifiers)
 				?? throw new ArgumentException($"{nameof(node)} was not declared in {nameof(semanticModel)}.");
 
 			return match;
 		}
 		public static Boolean HasAttributes(this ISymbol symbol, params TypeIdentifier[] identifiers)
 		{
-			var match = symbol.GetAttributes().OfAttributeClasses(identifiers).Any();
+			Boolean match = symbol.GetAttributes().OfAttributeClasses(identifiers).Any();
 
 			return match;
 		}
 
 		public static Boolean IsType(this AttributeData attribute, TypeIdentifier identifier)
 		{
-			var match = attribute.AttributeClass.ToDisplayString() == identifier.ToString();
+			Boolean match = attribute.AttributeClass.ToDisplayString() == identifier.ToString();
 
 			return match;
 		}
 		public static Boolean TryParseArgument<T>(this AttributeData attribute, out T value, Int32 position = -1, String propertyName = null)
 		{
-			var arg = attribute.GetArgument(position, propertyName);
+			TypedConstant arg = attribute.GetArgument(position, propertyName);
 
-			var result = TryParse(arg, out value);
+			Boolean result = TryParse(arg, out value);
 
 			return result;
 		}
 		public static Boolean TryParseArrayArgument<T>(this AttributeData attribute, out T[] value, Int32 position = -1, String propertyName = null)
 		{
-			var arg = attribute.GetArgument(position, propertyName);
+			TypedConstant arg = attribute.GetArgument(position, propertyName);
 
-			var result = TryParseArray(arg, out value);
+			Boolean result = TryParseArray(arg, out value);
 
 			return result;
 		}
@@ -414,7 +413,7 @@ namespace RhoMicro.CodeAnalysis
 		{
 			if (constant.Kind is TypedConstantKind.Array)
 			{
-				var parseResults = constant.Values
+				T[] parseResults = constant.Values
 					.Select(c => (success: TryParse(c, out T value), value))
 					.Where(r => r.success)
 					.Select(r => r.value)
@@ -433,23 +432,25 @@ namespace RhoMicro.CodeAnalysis
 
 		public static TypedConstant GetArgument(this AttributeData attribute, Int32 position = -1, String propertyName = null)
 		{
-			var namedArgument = attribute.NamedArguments.FirstOrDefault(kvp => kvp.Key == propertyName);
+			KeyValuePair<String, TypedConstant> namedArgument = attribute.NamedArguments.FirstOrDefault(kvp => kvp.Key == propertyName);
 			if (namedArgument.Value.Kind != TypedConstantKind.Error)
 			{
 				return namedArgument.Value;
 			}
-			var positionalArgument = attribute.ConstructorArguments.Skip(position).FirstOrDefault();
+
+			TypedConstant positionalArgument = attribute.ConstructorArguments.Skip(position).FirstOrDefault();
 
 			return positionalArgument;
 		}
 		#endregion
 		private static IEnumerable<String> GetVariations(TypeIdentifier attributeIdentifier)
 		{
-			var baseVariation = attributeIdentifier.ToString();
+			String baseVariation = attributeIdentifier.ToString();
 			if (baseVariation.EndsWith("Attribute"))
 			{
 				return new[] { baseVariation, baseVariation.Substring(0, baseVariation.Length - "Attribute".Length) };
 			}
+
 			return new[] { baseVariation };
 		}
 	}

@@ -12,12 +12,12 @@ namespace RhoMicro.CodeAnalysis
 			_elementComparer = elementComparer ?? throw new ArgumentNullException(nameof(elementComparer));
 		}
 
-		public static readonly ImmutableArrayEqualityComparer<T> Instance = new ImmutableArrayEqualityComparer<T>(EqualityComparer<T>.Default);
+		public static readonly ImmutableArrayEqualityComparer<T> Instance = new(EqualityComparer<T>.Default);
 		private readonly IEqualityComparer<T> _elementComparer;
 
 		public Boolean Equals(ImmutableArray<T> x, ImmutableArray<T> y)
 		{
-			var result = x == y ||
+			Boolean result = x == y ||
 						 x != null &&
 						 y != null &&
 						 x.SequenceEqual(y, _elementComparer);
@@ -34,9 +34,9 @@ namespace RhoMicro.CodeAnalysis
 
 			unchecked
 			{
-				var hash = -179327946;
+				Int32 hash = -179327946;
 
-				foreach (var element in obj)
+				foreach (T element in obj)
 				{
 					hash = hash * -1521134295 + _elementComparer.GetHashCode(element);
 				}

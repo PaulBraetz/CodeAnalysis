@@ -19,7 +19,7 @@ An error has occured:
 		}
 
 		public readonly ImmutableArray<Exception> Exceptions;
-		private readonly string _string;
+		private readonly String _string;
 
 		public static Error Create()
 		{
