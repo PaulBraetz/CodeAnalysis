@@ -6,7 +6,7 @@ namespace RhoMicro.CodeAnalysis.Attributes
 {
 	internal sealed class AttributeFactoryCollection<T> : IAttributeFactory<T>
 	{
-		private readonly List<IAttributeFactory<T>> _factories = new();
+		private readonly List<IAttributeFactory<T>> _factories = new List<IAttributeFactory<T>>();
 
 		public AttributeFactoryCollection<T> Add(IAttributeFactory<T> factory)
 		{

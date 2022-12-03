@@ -4,7 +4,7 @@ namespace RhoMicro.CodeAnalysis
 {
 	internal sealed class NamespaceEqualityComparer : IEqualityComparer<INamespace>
 	{
-		public static readonly NamespaceEqualityComparer Instance = new();
+		public static readonly NamespaceEqualityComparer Instance = new NamespaceEqualityComparer();
 		public System.Boolean Equals(INamespace x, INamespace y)
 		{
 			System.Boolean result = x == y ||

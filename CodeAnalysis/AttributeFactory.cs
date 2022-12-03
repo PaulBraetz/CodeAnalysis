@@ -12,7 +12,7 @@ namespace RhoMicro.CodeAnalysis.Attributes
 	{
 		public static IAttributeFactory<T> Create()
 		{
-			AttributeFactoryCollection<T> collection = new();
+			var collection = new AttributeFactoryCollection<T>();
 
 			Type type = typeof(T);
 			PropertyInfo[] properties = type.GetProperties().Where(p => p.CanWrite).ToArray();
@@ -51,10 +51,10 @@ namespace RhoMicro.CodeAnalysis.Attributes
 
 						ParameterExpression newInstanceExpr = Expression.Variable(type, "instance");
 
-						List<ParameterExpression> blockVariables = new();
-						List<Expression> blockExpressions = new();
-						List<Expression> typeParamSetExpressions = new();
-						List<ParameterExpression> typeParamVariables = new();
+						var blockVariables = new List<ParameterExpression>();
+						var blockExpressions = new List<Expression>();
+						var typeParamSetExpressions = new List<Expression>();
+						var typeParamVariables = new List<ParameterExpression>();
 
 						Boolean implementsTypeParameterSetter = type.TryGetMethodSemantically(typeof(IHasTypeParameter).GetMethod(nameof(IHasTypeParameter.SetTypeParameter)), out MethodInfo typeParameterSetter);
 

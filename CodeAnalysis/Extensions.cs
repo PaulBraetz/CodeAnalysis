@@ -191,14 +191,14 @@ namespace RhoMicro.CodeAnalysis
 
 		public static IEnumerable<AttributeSyntax> OfAttributeClasses(this IEnumerable<AttributeSyntax> attributes, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
 		{
-			HashSet<String> requiredTypes = new(identifiers.SelectMany(GetVariations));
+			var requiredTypes = new HashSet<String>(identifiers.SelectMany(GetVariations));
 			IEnumerable<AttributeSyntax> foundAttributes = attributes.Where(a => requiredTypes.Contains(semanticModel.GetTypeInfo(a).Type?.ToDisplayString()));
 
 			return foundAttributes;
 		}
 		public static IEnumerable<AttributeSyntax> OfAttributeClasses(this IEnumerable<AttributeListSyntax> attributeLists, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
 		{
-			HashSet<String> requiredTypes = new(identifiers.SelectMany(GetVariations));
+			var requiredTypes = new HashSet<String>(identifiers.SelectMany(GetVariations));
 			IEnumerable<AttributeSyntax> foundAttributes = attributeLists.SelectMany(al => al.Attributes).Where(a => requiredTypes.Contains(semanticModel.GetTypeInfo(a).Type?.ToDisplayString()));
 
 			return foundAttributes;
@@ -353,7 +353,7 @@ namespace RhoMicro.CodeAnalysis
 		#region AttributeData Operations
 		public static IEnumerable<AttributeData> OfAttributeClasses(this IEnumerable<AttributeData> attributes, params TypeIdentifier[] identifiers)
 		{
-			HashSet<String> requiredTypes = new(identifiers.Select(i => i.ToString()));
+			var requiredTypes = new HashSet<String>(identifiers.Select(i => i.ToString()));
 			IEnumerable<AttributeData> foundAttributes = attributes.Where(a => requiredTypes.Contains(a.AttributeClass.ToDisplayString()));
 
 			return foundAttributes;
@@ -446,12 +446,11 @@ namespace RhoMicro.CodeAnalysis
 		private static IEnumerable<String> GetVariations(TypeIdentifier attributeIdentifier)
 		{
 			String baseVariation = attributeIdentifier.ToString();
-			if (baseVariation.EndsWith("Attribute"))
-			{
-				return new[] { baseVariation, baseVariation.Substring(0, baseVariation.Length - "Attribute".Length) };
-			}
+			IEnumerable<String> result = baseVariation.EndsWith("Attribute")
+				? (new[] { baseVariation, baseVariation.Substring(0, baseVariation.Length - "Attribute".Length) })
+				: (IEnumerable<String>)(new[] { baseVariation });
 
-			return new[] { baseVariation };
+			return result;
 		}
 	}
 }
