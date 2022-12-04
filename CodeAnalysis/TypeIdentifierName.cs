@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -123,6 +124,18 @@ namespace RhoMicro.CodeAnalysis
 		{
 			ImmutableArray<IIdentifierPart> parts = GetNextParts(IdentifierParts.Kind.Array).Add(IdentifierPart.Array());
 			return new TypeIdentifierName(parts);
+		}
+
+		public TypeIdentifierName WithParts(IEnumerable<IIdentifierPart> parts)
+		{
+			if (parts == null) throw new ArgumentNullException(nameof(parts));
+
+			ImmutableArray<IIdentifierPart> resultParts = ImmutableArray.Create<IIdentifierPart>()
+				.AddRange(parts);
+
+			var result = new TypeIdentifierName(resultParts);
+
+			return result;
 		}
 
 		private ImmutableArray<IIdentifierPart> GetNextParts(IdentifierParts.Kind nextKind)

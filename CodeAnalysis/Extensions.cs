@@ -10,6 +10,59 @@ namespace RhoMicro.CodeAnalysis
 {
 	internal static class Extensions
 	{
+		public static Int32 GetParentsCount(this ITypeIdentifierName name)
+		{
+			if (name == null)
+				throw new ArgumentNullException(nameof(name));
+
+			var parentsCount = -1;
+			for (int i = 0; i < name.Parts.Length; i++)
+			{
+				var part = name.Parts[i];
+				if (part.Kind == IdentifierParts.Kind.Name)
+				{
+					parentsCount++;
+				}
+				if (part.Kind == IdentifierParts.Kind.GenericOpen ||
+					part.Kind == IdentifierParts.Kind.Array)
+				{
+					break;
+				}
+			}
+
+			var result = parentsCount > 0 ?
+				parentsCount :
+				0;
+
+			return result;
+		}
+
+		public static ITypeIdentifierName ParentOrSelf(this ITypeIdentifierName name)
+		{
+			if (name == null)
+				throw new ArgumentNullException(nameof(name));
+
+			Int32 parentsCount = name.GetParentsCount();
+			ITypeIdentifierName result = parentsCount > 0 ?
+				new TypeIdentifierName().WithParts(name.Parts.Take(parentsCount * 2 - 1)) :
+				name;
+
+			return result;
+		}
+
+		public static ITypeIdentifierName WithoutParents(this ITypeIdentifierName name)
+		{
+			if (name == null)
+				throw new ArgumentNullException(nameof(name));
+
+			Int32 parentsCount = name.GetParentsCount();
+			ITypeIdentifierName result = parentsCount > 0 ?
+				new TypeIdentifierName().WithParts(name.Parts.Skip(parentsCount*2)) :
+				name;
+
+			return result;
+		}
+
 		public static String ToNonGenericString(this TypeIdentifier identifier)
 		{
 			String result = String.Concat(identifier.Namespace.Parts.Append(IdentifierPart.Period()).Concat(identifier.Name.Parts.TakeWhile(p => p.Kind == IdentifierParts.Kind.Name || p.Kind == IdentifierParts.Kind.Period)));
@@ -351,21 +404,21 @@ namespace RhoMicro.CodeAnalysis
 		#endregion
 
 		#region AttributeData Operations
-		public static IEnumerable<AttributeData> OfAttributeClasses(this IEnumerable<AttributeData> attributes, params TypeIdentifier[] identifiers)
+		public static IEnumerable<AttributeData> OfAttributeClasses(this IEnumerable<AttributeData> attributes, params ITypeIdentifier[] identifiers)
 		{
 			var requiredTypes = new HashSet<String>(identifiers.Select(i => i.ToString()));
 			IEnumerable<AttributeData> foundAttributes = attributes.Where(a => requiredTypes.Contains(a.AttributeClass.ToDisplayString()));
 
 			return foundAttributes;
 		}
-		public static Boolean HasAttributes(this SyntaxNode node, SemanticModel semanticModel, params TypeIdentifier[] identifiers)
+		public static Boolean HasAttributes(this SyntaxNode node, SemanticModel semanticModel, params ITypeIdentifier[] identifiers)
 		{
 			Boolean match = semanticModel.GetDeclaredSymbol(node)?.HasAttributes(identifiers)
 				?? throw new ArgumentException($"{nameof(node)} was not declared in {nameof(semanticModel)}.");
 
 			return match;
 		}
-		public static Boolean HasAttributes(this ISymbol symbol, params TypeIdentifier[] identifiers)
+		public static Boolean HasAttributes(this ISymbol symbol, params ITypeIdentifier[] identifiers)
 		{
 			Boolean match = symbol.GetAttributes().OfAttributeClasses(identifiers).Any();
 
