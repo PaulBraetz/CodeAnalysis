@@ -74,16 +74,9 @@ namespace RhoMicro.CodeAnalysis.Attributes
 							{
 								MethodCallExpression callExpr = Expression.Call(null, tryParseMethod, parameters[0], parameters[1], outValue, Expression.Constant(i), Expression.Convert(Expression.Constant(null), typeof(String)), Expression.Constant(parameter.Name));
 
-								Expression noArgReactionExpr = null;
-								if (parameter.HasDefaultValue)
-								{
-									noArgReactionExpr = Expression.Assign(outValue, Expression.Convert(Expression.Constant(parameter.DefaultValue), parameter.ParameterType));
-								}
-								else
-								{
-									noArgReactionExpr = getThrowExpr($"Missing argument for {parameter.Name} of type {parameter.ParameterType} encountered while attempting to construct instance of type {typeof(T)}.");
-								}
-
+								Expression noArgReactionExpr = parameter.HasDefaultValue
+									? Expression.Assign(outValue, Expression.Convert(Expression.Constant(parameter.DefaultValue), parameter.ParameterType))
+									: getThrowExpr($"Missing argument for {parameter.Name} of type {parameter.ParameterType} encountered while attempting to construct instance of type {typeof(T)}.");
 								paramAssignmentExpr = Expression.IfThen(Expression.Not(callExpr), noArgReactionExpr);
 							}
 							else

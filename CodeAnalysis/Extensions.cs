@@ -13,16 +13,19 @@ namespace RhoMicro.CodeAnalysis
 		public static Int32 GetParentsCount(this ITypeIdentifierName name)
 		{
 			if (name == null)
-				throw new ArgumentNullException(nameof(name));
-
-			var parentsCount = -1;
-			for (int i = 0; i < name.Parts.Length; i++)
 			{
-				var part = name.Parts[i];
+				throw new ArgumentNullException(nameof(name));
+			}
+
+			Int32 parentsCount = -1;
+			for (Int32 i = 0; i < name.Parts.Length; i++)
+			{
+				IIdentifierPart part = name.Parts[i];
 				if (part.Kind == IdentifierParts.Kind.Name)
 				{
 					parentsCount++;
 				}
+
 				if (part.Kind == IdentifierParts.Kind.GenericOpen ||
 					part.Kind == IdentifierParts.Kind.Array)
 				{
@@ -30,7 +33,7 @@ namespace RhoMicro.CodeAnalysis
 				}
 			}
 
-			var result = parentsCount > 0 ?
+			Int32 result = parentsCount > 0 ?
 				parentsCount :
 				0;
 
@@ -40,7 +43,9 @@ namespace RhoMicro.CodeAnalysis
 		public static ITypeIdentifierName ParentOrSelf(this ITypeIdentifierName name)
 		{
 			if (name == null)
+			{
 				throw new ArgumentNullException(nameof(name));
+			}
 
 			Int32 parentsCount = name.GetParentsCount();
 			ITypeIdentifierName result = parentsCount > 0 ?
@@ -53,11 +58,13 @@ namespace RhoMicro.CodeAnalysis
 		public static ITypeIdentifierName WithoutParents(this ITypeIdentifierName name)
 		{
 			if (name == null)
+			{
 				throw new ArgumentNullException(nameof(name));
+			}
 
 			Int32 parentsCount = name.GetParentsCount();
 			ITypeIdentifierName result = parentsCount > 0 ?
-				new TypeIdentifierName().WithParts(name.Parts.Skip(parentsCount*2)) :
+				new TypeIdentifierName().WithParts(name.Parts.Skip(parentsCount * 2)) :
 				name;
 
 			return result;

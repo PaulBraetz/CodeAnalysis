@@ -49,16 +49,9 @@ namespace RhoMicro.CodeAnalysis
 				for (Int32 i = 0; i < arguments.Length; i++)
 				{
 					ITypeSymbol typeArgument = namedSymbol.TypeArguments[i];
-					TypeIdentifier argument;
-					if (SymbolEqualityComparer.Default.Equals(typeArgument.ContainingType, namedSymbol))
-					{
-						argument = TypeIdentifier.Create(TypeIdentifierName.Create().AppendNamePart(typeArgument.ToString()), Namespace.Create());
-					}
-					else
-					{
-						argument = TypeIdentifier.Create(typeArgument);
-					}
-
+					TypeIdentifier argument = SymbolEqualityComparer.Default.Equals(typeArgument.ContainingType, namedSymbol)
+						? TypeIdentifier.Create(TypeIdentifierName.Create().AppendNamePart(typeArgument.ToString()), Namespace.Create())
+						: TypeIdentifier.Create(typeArgument);
 					arguments[i] = argument;
 				}
 
@@ -128,7 +121,10 @@ namespace RhoMicro.CodeAnalysis
 
 		public TypeIdentifierName WithParts(IEnumerable<IIdentifierPart> parts)
 		{
-			if (parts == null) throw new ArgumentNullException(nameof(parts));
+			if (parts == null)
+			{
+				throw new ArgumentNullException(nameof(parts));
+			}
 
 			ImmutableArray<IIdentifierPart> resultParts = ImmutableArray.Create<IIdentifierPart>()
 				.AddRange(parts);
@@ -146,12 +142,7 @@ namespace RhoMicro.CodeAnalysis
 									(lastKind == IdentifierParts.Kind.GenericOpen ||
 									lastKind == IdentifierParts.Kind.Name);
 
-			if (prependSeparator)
-			{
-				return Parts.Add(IdentifierPart.Period());
-			}
-
-			return Parts;
+			return prependSeparator ? Parts.Add(IdentifierPart.Period()) : Parts;
 		}
 
 		public override String ToString()

@@ -32,7 +32,7 @@ namespace RhoMicro.CodeAnalysis
 				.NormalizeWhitespace()
 				.ToFullString();
 
-			HintName = $"{fileName}.g.cs";
+			HintName = $"{fileName.Replace('.', '_')}.g.cs";
 		}
 
 		public override Boolean Equals(Object obj)
