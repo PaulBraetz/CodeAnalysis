@@ -2,8 +2,8 @@
 
 namespace RhoMicro.CodeAnalysis
 {
-	internal interface INamespace
-	{
-		ImmutableArray<IIdentifierPart> Parts { get; }
-	}
+    internal interface INamespace
+    {
+        ImmutableArray<IIdentifierPart> Parts { get; }
+    }
 }
