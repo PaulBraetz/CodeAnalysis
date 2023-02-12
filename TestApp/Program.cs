@@ -157,8 +157,8 @@ namespace TestNamespace
 
             throw new Exception();
             t = t;
-		}
-	}
+        }
+    }
 }";
 
         private static AttributeAnalysisUnit<TestAttribute> AnalysisUnit { get; } = new AttributeAnalysisUnit<TestAttribute>(SOURCE);
