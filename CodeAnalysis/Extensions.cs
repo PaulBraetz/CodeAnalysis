@@ -27,8 +27,8 @@ namespace RhoMicro.CodeAnalysis
                     parentsCount++;
                 }
 
-                if(part.Kind is IdentifierParts.Kind.GenericOpen or
-                    IdentifierParts.Kind.Array)
+                if(part.Kind == IdentifierParts.Kind.GenericOpen ||
+                    part.Kind == IdentifierParts.Kind.Array)
                 {
                     break;
                 }
@@ -73,7 +73,8 @@ namespace RhoMicro.CodeAnalysis
 
         public static String ToNonGenericString(this TypeIdentifier identifier)
         {
-            var result = String.Concat(identifier.Namespace.Parts.Append(IdentifierPart.Period()).Concat(identifier.Name.Parts.TakeWhile(p => p.Kind is IdentifierParts.Kind.Name or IdentifierParts.Kind.Period)));
+            var result = String.Concat(identifier.Namespace.Parts.Append(IdentifierPart.Period())
+                .Concat(identifier.Name.Parts.TakeWhile(p => p.Kind == IdentifierParts.Kind.Name || p.Kind == IdentifierParts.Kind.Period)));
 
             return result;
         }
@@ -216,7 +217,7 @@ namespace RhoMicro.CodeAnalysis
                 var allValid = arguments.Where(a => a.NameEquals != null)
                     .All(a =>
                         properties.ContainsKey(a.NameEquals.Name.Identifier.ToString()) &&
-                        (a.Expression is not TypeOfExpressionSyntax || constructor.DeclaringType.ImplementsMethodsSemantically<IHasTypeProperty>()));
+                        (!(a.Expression is TypeOfExpressionSyntax) || constructor.DeclaringType.ImplementsMethodsSemantically<IHasTypeProperty>()));
 
                 return allValid;
             }
@@ -438,7 +439,7 @@ namespace RhoMicro.CodeAnalysis
 
         public static Boolean TryParse<T>(this TypedConstant constant, out T value)
         {
-            if(constant.Kind is not TypedConstantKind.Error and not TypedConstantKind.Array)
+            if(constant.Kind != TypedConstantKind.Error && constant.Kind != TypedConstantKind.Array)
             {
                 if(constant.Value is T castValue)
                 {
@@ -488,7 +489,7 @@ namespace RhoMicro.CodeAnalysis
         {
             var baseVariation = attributeIdentifier.ToString();
             var result = baseVariation.EndsWith("Attribute")
-                ? (new[] { baseVariation, baseVariation[..^"Attribute".Length] })
+                ? (new[] { baseVariation, baseVariation.Substring(0, baseVariation.Length-"Attribute".Length) })
                 : (IEnumerable<String>)(new[] { baseVariation });
 
             return result;

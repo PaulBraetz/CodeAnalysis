@@ -18,12 +18,12 @@ An error has occured:
 */";
         }
 
-        public readonly ImmutableArray<Exception> Exceptions;
+        public ImmutableArray<Exception> Exceptions { get; }
         private readonly String _string;
 
-        public static Error Create() => new(ImmutableArray.Create<Exception>());
-        public Error With(Exception exception) => new(Exceptions.Add(exception));
-        public Error With(params Exception[] exceptions) => new(Exceptions.AddRange(exceptions));
+        public static Error Create() => new Error(ImmutableArray.Create<Exception>());
+        public Error With(Exception exception) => new Error(Exceptions.Add(exception));
+        public Error With(params Exception[] exceptions) => new Error(Exceptions.AddRange(exceptions));
         public Error WithFlattened(Exception exception) => With(Flatten(exception).ToArray());
         public Error WithFlattened(params Exception[] exceptions) => With(exceptions.SelectMany(Flatten).ToArray());
         private static IEnumerable<Exception> Flatten(Exception exception)

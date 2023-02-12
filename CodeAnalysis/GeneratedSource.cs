@@ -9,8 +9,8 @@ namespace RhoMicro.CodeAnalysis
 {
     internal readonly struct GeneratedSource : IEquatable<GeneratedSource>
     {
-        public readonly String Text;
-        public readonly String HintName;
+        public String Text { get; }
+        public String HintName { get; }
 
         public GeneratedSource(String source, String fileName, Boolean disableWarnings = true) : this(CSharpSyntaxTree.ParseText(source).GetRoot(), fileName, disableWarnings)
         {

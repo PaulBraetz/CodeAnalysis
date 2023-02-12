@@ -60,7 +60,7 @@ namespace RhoMicro.CodeAnalysis
 
             return result;
         }
-        public static TypeIdentifierName Create() => new(ImmutableArray<IIdentifierPart>.Empty);
+        public static TypeIdentifierName Create() => new TypeIdentifierName(ImmutableArray<IIdentifierPart>.Empty);
         public static TypeIdentifierName Create(IEnumerable<IIdentifierPart> parts)
         {
             if(parts == null)

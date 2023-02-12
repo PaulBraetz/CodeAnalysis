@@ -38,7 +38,7 @@ namespace RhoMicro.CodeAnalysis
 
             return result;
         }
-        public static Namespace Create() => new(ImmutableArray.Create<IIdentifierPart>());
+        public static Namespace Create() => new Namespace(ImmutableArray.Create<IIdentifierPart>());
 
         public Namespace Append(String name)
         {

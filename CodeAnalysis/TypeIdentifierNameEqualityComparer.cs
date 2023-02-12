@@ -4,7 +4,7 @@ namespace RhoMicro.CodeAnalysis
 {
     internal sealed class TypeIdentifierNameEqualityComparer : IEqualityComparer<ITypeIdentifierName>
     {
-        public static readonly TypeIdentifierNameEqualityComparer Instance = new();
+        public static readonly TypeIdentifierNameEqualityComparer Instance = new TypeIdentifierNameEqualityComparer();
         public System.Boolean Equals(ITypeIdentifierName x, ITypeIdentifierName y)
         {
             var result = x == y ||

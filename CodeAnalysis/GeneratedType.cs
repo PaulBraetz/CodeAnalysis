@@ -18,8 +18,8 @@ namespace RhoMicro.CodeAnalysis
             Source = source;
         }
 
-        public readonly GeneratedSource Source;
-        public readonly TypeIdentifier Identifier;
+        public GeneratedSource Source { get; }
+        public TypeIdentifier Identifier { get; }
 
         public INamedTypeSymbol ExtractSymbol(Compilation compilation)
         {

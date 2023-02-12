@@ -12,7 +12,7 @@ namespace RhoMicro.CodeAnalysis
             _elementComparer = elementComparer ?? throw new ArgumentNullException(nameof(elementComparer));
         }
 
-        public static readonly ImmutableArrayEqualityComparer<T> Instance = new(EqualityComparer<T>.Default);
+        public static readonly ImmutableArrayEqualityComparer<T> Instance = new  ImmutableArrayEqualityComparer<T>(EqualityComparer<T>.Default);
         private readonly IEqualityComparer<T> _elementComparer;
 
         public Boolean Equals(ImmutableArray<T> x, ImmutableArray<T> y)

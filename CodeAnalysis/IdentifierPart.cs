@@ -11,24 +11,36 @@ namespace RhoMicro.CodeAnalysis
         {
             Kind = kind;
 
-            Value = Kind switch
+            switch(kind)
             {
-                IdentifierParts.Kind.Array => "[]",
-                IdentifierParts.Kind.GenericOpen => "<",
-                IdentifierParts.Kind.GenericClose => ">",
-                IdentifierParts.Kind.Period => ".",
-                IdentifierParts.Kind.Comma => ", ",
-                _ => name,
-            };
+                case IdentifierParts.Kind.Array:
+                    Value = "[]";
+                    break;
+                case IdentifierParts.Kind.GenericOpen:
+                    Value = "<";
+                    break;
+                case IdentifierParts.Kind.GenericClose:
+                    Value = ">";
+                    break;
+                case IdentifierParts.Kind.Period:
+                    Value = ".";
+                    break;
+                case IdentifierParts.Kind.Comma:
+                    Value = ", ";
+                    break;
+                default:
+                    Value = name;
+                    break;
+            }
         }
         private IdentifierPart(IdentifierParts.Kind kind) : this(null, kind) { }
 
-        public static IdentifierPart Name(String name) => new(name, IdentifierParts.Kind.Name);
-        public static IdentifierPart Array() => new(IdentifierParts.Kind.Array);
-        public static IdentifierPart GenericOpen() => new(IdentifierParts.Kind.GenericOpen);
-        public static IdentifierPart GenericClose() => new(IdentifierParts.Kind.GenericClose);
-        public static IdentifierPart Period() => new(IdentifierParts.Kind.Period);
-        public static IdentifierPart Comma() => new(IdentifierParts.Kind.Comma);
+        public static IdentifierPart Name(String name) => new IdentifierPart(name, IdentifierParts.Kind.Name);
+        public static IdentifierPart Array() => new IdentifierPart(IdentifierParts.Kind.Array);
+        public static IdentifierPart GenericOpen() => new IdentifierPart(IdentifierParts.Kind.GenericOpen);
+        public static IdentifierPart GenericClose() => new IdentifierPart(IdentifierParts.Kind.GenericClose);
+        public static IdentifierPart Period() => new IdentifierPart(IdentifierParts.Kind.Period);
+        public static IdentifierPart Comma() => new IdentifierPart(IdentifierParts.Kind.Comma);
         public override String ToString() => Value ?? String.Empty;
 
         public override Boolean Equals(Object obj) => obj is IIdentifierPart identifierPart && Equals(identifierPart);

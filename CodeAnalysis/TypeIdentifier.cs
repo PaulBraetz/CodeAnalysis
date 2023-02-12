@@ -54,7 +54,10 @@ namespace RhoMicro.CodeAnalysis
                 name = name.AppendArrayPart();
             }
 
-            @namespace ??= CodeAnalysis.Namespace.Create(type);
+            if(@namespace == null)
+            {
+                @namespace = CodeAnalysis.Namespace.Create(type);
+            }
 
             return Create(name, @namespace);
         }
@@ -78,7 +81,7 @@ namespace RhoMicro.CodeAnalysis
 
             return Create(identifier, @namespace);
         }
-        public static TypeIdentifier Create(ITypeIdentifierName name, INamespace @namespace) => new(name, @namespace);
+        public static TypeIdentifier Create(ITypeIdentifierName name, INamespace @namespace) => new TypeIdentifier(name, @namespace);
 
         public override Boolean Equals(Object obj) => obj is ITypeIdentifier identifier && Equals(identifier);
 

@@ -4,7 +4,7 @@ namespace RhoMicro.CodeAnalysis
 {
     internal sealed class IdentifierPartEqualityComparer : IEqualityComparer<IIdentifierPart>
     {
-        public static readonly IdentifierPartEqualityComparer Instance = new();
+        public static readonly IdentifierPartEqualityComparer Instance = new IdentifierPartEqualityComparer();
         public System.Boolean Equals(IIdentifierPart x, IIdentifierPart y)
         {
             var result = x == y ||
