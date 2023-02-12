@@ -6,10 +6,10 @@ namespace RhoMicro.CodeAnalysis
 {
     internal readonly struct GeneratedType : IEquatable<GeneratedType>
     {
-        public GeneratedType(TypeIdentifier identifier, SyntaxNode source) : this(identifier, new GeneratedSource(source, identifier.ToNonGenericString().Replace('.', '_')))
+        public GeneratedType(TypeIdentifier identifier, SyntaxNode source) : this(identifier, new GeneratedSource(source, identifier.ToNonGenericString()))
         {
         }
-        public GeneratedType(TypeIdentifier identifier, String source) : this(identifier, new GeneratedSource(source, identifier.ToNonGenericString().Replace('.', '_')))
+        public GeneratedType(TypeIdentifier identifier, String source) : this(identifier, new GeneratedSource(source, identifier.ToNonGenericString()))
         {
         }
         public GeneratedType(TypeIdentifier identifier, GeneratedSource source) : this()

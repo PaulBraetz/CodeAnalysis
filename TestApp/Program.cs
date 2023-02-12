@@ -7,6 +7,7 @@ using RhoMicro.CodeAnalysis.Attributes;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace TestApp
@@ -77,7 +78,9 @@ namespace TestApp
     internal class Program
     {
         private const String SOURCE =
-@"namespace TestApp
+@"using System;
+using System.Collections.Generic;
+namespace TestApp
 {
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 	internal class TestAttribute : Attribute
@@ -129,7 +132,7 @@ namespace TestApp
 }";
 
         private const String TESTCLASS_SOURCE =
-@"
+@"using System;
 using TestApp;
 
 namespace TestNamespace
@@ -142,6 +145,18 @@ namespace TestNamespace
 		public void TestMethod()
 		{
 
+		}
+	}
+
+    internal class Program
+    {
+        public static void Main(string[] args)
+        {
+            var t = 0;
+            t = t;
+
+            throw new Exception();
+            t = t;
 		}
 	}
 }";
@@ -160,6 +175,9 @@ namespace TestNamespace
                 .SelectMany(t => t.DescendantNodes(n => n is not BaseTypeDeclarationSyntax))
                 .OfType<BaseTypeDeclarationSyntax>()
                 .ToArray()[0];
+
+            using var peStream = new MemoryStream();
+            var result = compilation.Emit(peStream);
 
             var semanticModel = compilation.GetSemanticModel(type.SyntaxTree);
 
